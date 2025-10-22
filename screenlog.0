@@ -1,0 +1,20 @@
+Launching lib/main.dart on macOS in debug mode...
+⣷⣯⣽⣻⣟⡿ Building macOS application...                                          ⣷⣯⣽⣻[K[31m--- xcodebuild: WARNING: Using the first of multiple matching destinations:[39m
+Building macOS application...                                          ⣟[K[31m{ platform:macOS, arch:arm64, id:00006040-0004610C2100801C, name:My Mac }[39m
+Building macOS application...                                          ⡿[K[31m{ platform:macOS, arch:x86_64, id:00006040-0004610C2100801C, name:My Mac }[39m
+Building macOS application...                                          ⢿⣻⣟⣯⣽⣾⣷⣯⣽⣻⣟⡿⢿⣻⣟⣯⣽⣾⣷⣯⣽⣻⣟ 
+[32m[1m[32m✓[39m[32m[22m Built build/macos/Build/Products/Debug/hapke_app.app[39m
+Syncing files to device macOS...                                       ⣷     23ms
+
+Flutter run key commands.
+[1mr[22m Hot reload. 🔥🔥🔥
+[1mR[22m Hot restart.
+[1mh[22m List all available interactive commands.
+[1md[22m Detach (terminate "flutter run" but leave application running).
+[1mc[22m Clear the screen
+[1mq[22m Quit (terminate the application on the device).
+
+A Dart VM Service on macOS is available at: http://127.0.0.1:50282/KUiIknro4Kg=/
+The Flutter DevTools debugger and profiler on macOS is available at:
+http://127.0.0.1:9101?uri=http://127.0.0.1:50282/KUiIknro4Kg=/
+Lost connection to device.
