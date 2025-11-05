@@ -56,6 +56,22 @@ class ApiClient {
     });
   }
 
+  Future<http.Response> patch(
+    Uri uri, {
+    Map<String, String>? headers,
+    Object? body,
+    Encoding? encoding,
+  }) {
+    return _send(() {
+      return _client.patch(
+        uri,
+        headers: _buildHeaders(headers),
+        body: body,
+        encoding: encoding,
+      );
+    });
+  }
+
   Future<http.Response> _send(Future<http.Response> Function() request) async {
     http.Response response;
     try {
@@ -142,12 +158,14 @@ class CartItem {
 }
 
 class HapkeUser {
+  final String id;
   final String name;
   final String email;
   final String phone;
   final String address;
   final String gender; // "Man", "Vrouw", "Anders", "Zeg ik liever niet"
   const HapkeUser({
+    required this.id,
     required this.name,
     required this.email,
     required this.phone,
@@ -160,6 +178,200 @@ class AuthSession {
   final HapkeUser user;
   final String token;
   const AuthSession({required this.user, required this.token});
+}
+
+class FriendUserInfo {
+  final String id;
+  final String email;
+  final String? name;
+  const FriendUserInfo({required this.id, required this.email, this.name});
+
+  factory FriendUserInfo.fromJson(Map<String, dynamic> json) {
+    return FriendUserInfo(
+      id: (json['id'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
+      name: json['name'] != null ? json['name'].toString() : null,
+    );
+  }
+
+  String get displayName {
+    final trimmed = name?.trim() ?? '';
+    return trimmed.isNotEmpty ? trimmed : email;
+  }
+}
+
+class FriendSummary {
+  final String friendshipId;
+  final FriendUserInfo user;
+  const FriendSummary({required this.friendshipId, required this.user});
+
+  factory FriendSummary.fromJson(Map<String, dynamic> json) {
+    final userJson = json['user'];
+    return FriendSummary(
+      friendshipId: (json['friendshipId'] ?? json['id'] ?? '').toString(),
+      user: userJson is Map<String, dynamic>
+          ? FriendUserInfo.fromJson(userJson)
+          : FriendUserInfo(id: '', email: ''),
+    );
+  }
+}
+
+class FriendRequestSummary {
+  final String friendshipId;
+  final DateTime createdAt;
+  final FriendUserInfo requester;
+  final FriendUserInfo addressee;
+  const FriendRequestSummary({
+    required this.friendshipId,
+    required this.createdAt,
+    required this.requester,
+    required this.addressee,
+  });
+
+  factory FriendRequestSummary.fromJson(Map<String, dynamic> json) {
+    final requesterJson = json['requester'];
+    final addresseeJson = json['addressee'];
+    return FriendRequestSummary(
+      friendshipId: (json['friendshipId'] ?? json['id'] ?? '').toString(),
+      createdAt:
+          DateTime.tryParse((json['createdAt'] ?? '').toString()) ??
+          DateTime.now(),
+      requester: requesterJson is Map<String, dynamic>
+          ? FriendUserInfo.fromJson(requesterJson)
+          : FriendUserInfo(id: '', email: ''),
+      addressee: addresseeJson is Map<String, dynamic>
+          ? FriendUserInfo.fromJson(addresseeJson)
+          : FriendUserInfo(id: '', email: ''),
+    );
+  }
+
+  bool isIncoming(String currentUserId) => addressee.id == currentUserId;
+}
+
+class FriendSearchResult {
+  final FriendUserInfo user;
+  final String relationship; // NONE, FRIEND, PENDING_INCOMING, PENDING_OUTGOING
+  final String? friendshipId;
+  const FriendSearchResult({
+    required this.user,
+    required this.relationship,
+    this.friendshipId,
+  });
+
+  factory FriendSearchResult.fromJson(Map<String, dynamic> json) {
+    if (json['user'] is Map<String, dynamic>) {
+      return FriendSearchResult(
+        user: FriendUserInfo.fromJson(json['user'] as Map<String, dynamic>),
+        relationship: (json['relationship'] ?? 'NONE').toString(),
+        friendshipId: json['friendshipId']?.toString(),
+      );
+    }
+    final info = FriendUserInfo(
+      id: (json['id'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
+      name: json['name'] != null ? json['name'].toString() : null,
+    );
+    return FriendSearchResult(
+      user: info,
+      relationship: (json['relationship'] ?? 'NONE').toString(),
+      friendshipId: json['friendshipId'] != null
+          ? json['friendshipId'].toString()
+          : null,
+    );
+  }
+}
+
+class ChatMessageView {
+  final String id;
+  final FriendUserInfo sender;
+  final String content;
+  final DateTime createdAt;
+  final bool isMine;
+  const ChatMessageView({
+    required this.id,
+    required this.sender,
+    required this.content,
+    required this.createdAt,
+    required this.isMine,
+  });
+
+  factory ChatMessageView.fromJson(
+    Map<String, dynamic> json,
+    String currentUserId,
+  ) {
+    final senderJson = json['sender'];
+    final sender = senderJson is Map<String, dynamic>
+        ? FriendUserInfo.fromJson(senderJson)
+        : FriendUserInfo(id: (json['senderId'] ?? '').toString(), email: '');
+    return ChatMessageView(
+      id: (json['id'] ?? '').toString(),
+      sender: sender,
+      content: (json['content'] ?? '').toString(),
+      createdAt:
+          DateTime.tryParse((json['createdAt'] ?? '').toString()) ??
+          DateTime.now(),
+      isMine: sender.id == currentUserId,
+    );
+  }
+}
+
+class ChatThread {
+  final String id;
+  final List<FriendUserInfo> participants;
+  final List<ChatMessageView> messages;
+  const ChatThread({
+    required this.id,
+    required this.participants,
+    required this.messages,
+  });
+
+  factory ChatThread.fromJson(Map<String, dynamic> json, String currentUserId) {
+    final participantsJson =
+        (json['participants'] as List<dynamic>? ?? const [])
+            .whereType<Map<String, dynamic>>()
+            .toList();
+    final messagesJson = (json['messages'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    return ChatThread(
+      id: (json['id'] ?? '').toString(),
+      participants: participantsJson
+          .map(FriendUserInfo.fromJson)
+          .where((u) => u.id.isNotEmpty)
+          .toList(),
+      messages: messagesJson
+          .map((msg) => ChatMessageView.fromJson(msg, currentUserId))
+          .toList(),
+    );
+  }
+}
+
+String extractErrorMessage(http.Response res) {
+  try {
+    if (res.body.isEmpty) {
+      return 'Status ${res.statusCode}';
+    }
+    final decoded = jsonDecode(res.body);
+    if (decoded is Map<String, dynamic>) {
+      final message = decoded['message'] ?? decoded['error'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+      final errors = decoded['errors'];
+      if (errors is List && errors.isNotEmpty) {
+        final first = errors.first;
+        if (first is String && first.trim().isNotEmpty) {
+          return first.trim();
+        }
+        if (first is Map && first['message'] is String) {
+          return (first['message'] as String).trim();
+        }
+      }
+    }
+  } catch (_) {
+    // fallback below
+  }
+  return 'Status ${res.statusCode}';
 }
 
 class OrderItemSummary {
@@ -624,50 +836,6 @@ final demoRestaurants = <Restaurant>[
     minOrder: 10.00,
     deliveryFee: null,
   ),
-  Restaurant(
-    id: 'r9',
-    name: 'Mootje',
-    cuisine: 'Je lokale drugsdealer',
-    category: 'Cafetaria',
-    rating: 4.1,
-    eta: '15–25 min',
-    menu: const [
-      MenuItem(
-        id: 'm41',
-        name: 'SOS',
-        description: 'Snelle snack voor als het even tegenzit',
-        priceCents: 650,
-      ),
-      MenuItem(
-        id: 'm42',
-        name: 'Miuaw',
-        description: 'Zachte bite met een speelse kick',
-        priceCents: 725,
-      ),
-      MenuItem(
-        id: 'm43',
-        name: 'Keeetaah',
-        description: 'Kruidige favoriet waar je van gaat spinnen',
-        priceCents: 775,
-      ),
-      MenuItem(
-        id: 'm44',
-        name: 'Sterooids',
-        description: 'Powerdrank voor de late uurtjes',
-        priceCents: 850,
-      ),
-      MenuItem(
-        id: 'm45',
-        name: 'Kopje Koffie En Een Goed Gesprek',
-        description: 'Sterke koffie met tijd voor een praatje',
-        priceCents: 450,
-      ),
-    ],
-    imageUrl:
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
-    minOrder: 11.00,
-    deliveryFee: 1.20,
-  ),
 ];
 
 // Images per gerecht (fallback naar restaurantfoto als ontbreekt)
@@ -762,40 +930,7 @@ const Map<String, String> _dishImages = {
       'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=1200&q=80',
   'm40':
       'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1200&q=80',
-  // Mootje
-  'm41':
-      'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1200&q=80',
-  'm42':
-      'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=1200&q=80',
-  'm43':
-      'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=1200&q=80',
-  'm44':
-      'https://images.unsplash.com/photo-1577805947697-89e18249d767?auto=format&fit=crop&w=1200&q=80',
-  'm45':
-      'https://images.unsplash.com/photo-1523949344631-1f58916912fa?auto=format&fit=crop&w=1200&q=80',
 };
-
-/// ---------------- Simple in-memory inbox for demo ----------------
-class AppInbox {
-  static final List<String> friends = ['Job', 'Sofia', 'Matrijn'];
-  static final Map<String, List<String>> messages = <String, List<String>>{};
-  static final Map<String, int> unread = <String, int>{};
-  static final ValueNotifier<int> tick = ValueNotifier<int>(0);
-
-  static void sendToFriend(String friend, String text) {
-    messages.putIfAbsent(friend, () => <String>[]).add(text);
-    unread[friend] = (unread[friend] ?? 0) + 1;
-    tick.value++;
-  }
-
-  static List<String> getConversation(String friend) =>
-      List<String>.from(messages[friend] ?? const []);
-  static int getUnread(String friend) => unread[friend] ?? 0;
-  static void markRead(String friend) {
-    unread[friend] = 0;
-    tick.value++;
-  }
-}
 
 /// ---------------- App root with state ----------------
 class HapkeApp extends StatefulWidget {
@@ -810,6 +945,8 @@ class _HapkeAppState extends State<HapkeApp> {
   String? _authToken;
   String? _pendingOrderId;
   bool _handlingUnauthorized = false;
+  List<Restaurant> _restaurants = List<Restaurant>.from(demoRestaurants);
+  bool _loadingRestaurants = false;
 
   int get cartCount => _cart.fold(0, (n, ci) => n + ci.qty);
   int get cartTotalCents =>
@@ -822,6 +959,7 @@ class _HapkeAppState extends State<HapkeApp> {
     Future.microtask(() async {
       await _restoreSession();
       await _restorePendingOrder();
+      await _loadRestaurants();
     });
   }
 
@@ -871,6 +1009,7 @@ class _HapkeAppState extends State<HapkeApp> {
   Future<void> _persistSession(AuthSession session) async {
     final payload = jsonEncode({
       'user': {
+        'id': session.user.id,
         'name': session.user.name,
         'email': session.user.email,
         'phone': session.user.phone,
@@ -913,11 +1052,13 @@ class _HapkeAppState extends State<HapkeApp> {
     try {
       String? token = await _secureStorage.read(key: _tokenStorageKey);
       final stored = await _secureStorage.read(key: _sessionStorageKey);
-      Map<String, dynamic> userData = const {};
+      Map<String, dynamic> userData = {};
       if (stored != null && stored.isNotEmpty) {
         try {
           final data = jsonDecode(stored) as Map<String, dynamic>;
-          userData = (data['user'] as Map<String, dynamic>? ?? const {});
+          userData = Map<String, dynamic>.from(
+            data['user'] as Map<String, dynamic>? ?? const {},
+          );
           if ((token == null || token.isEmpty) && data['token'] != null) {
             token = (data['token'] ?? '').toString();
           }
@@ -927,7 +1068,18 @@ class _HapkeAppState extends State<HapkeApp> {
       }
       if (token == null || token.isEmpty) return;
       apiClient.setToken(token);
+      if ((userData['id'] ?? '').toString().isEmpty) {
+        final profile = await _fetchProfile();
+        if (profile != null) {
+          userData = {...userData, ...profile};
+        }
+      }
+      final userId = (userData['id'] ?? '').toString();
+      if (userId.isEmpty) {
+        return;
+      }
       final restoredUser = HapkeUser(
+        id: userId,
         name: (userData['name'] ?? '').toString(),
         email: (userData['email'] ?? '').toString(),
         phone: (userData['phone'] ?? '').toString(),
@@ -942,14 +1094,35 @@ class _HapkeAppState extends State<HapkeApp> {
       // Laat kort weten dat de sessie is hersteld
       final ctx = appNavigatorKey.currentContext;
       if (ctx != null) {
-        final String naam = restoredUser.name.isNotEmpty ? restoredUser.name : 'gebruiker';
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('Welkom terug, $naam')),
-        );
+        final String naam = restoredUser.name.isNotEmpty
+            ? restoredUser.name
+            : 'gebruiker';
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(SnackBar(content: Text('Welkom terug, $naam')));
       }
     } catch (e) {
       debugPrint('Kon sessie niet herstellen: $e');
     }
+  }
+
+  Future<Map<String, dynamic>?> _fetchProfile() async {
+    try {
+      final res = await apiClient.get(
+        Uri.parse('$apiBase/auth/me'),
+        headers: {'Accept': 'application/json'},
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        final user = data['user'] is Map<String, dynamic>
+            ? data['user'] as Map<String, dynamic>
+            : null;
+        return user != null ? Map<String, dynamic>.from(user) : null;
+      }
+    } catch (e) {
+      debugPrint('Kon profiel niet ophalen: $e');
+    }
+    return null;
   }
 
   Future<void> _saveLastOrder(String orderId) async {
@@ -978,6 +1151,104 @@ class _HapkeAppState extends State<HapkeApp> {
     } catch (e) {
       debugPrint('Kon order niet herstellen: $e');
     }
+  }
+
+  Future<void> _loadRestaurants() async {
+    if (!mounted) return;
+    setState(() {
+      _loadingRestaurants = true;
+    });
+    try {
+      final res = await apiClient.get(Uri.parse('$apiBase/restaurants'));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (data is List) {
+          final parsed = <Restaurant>[];
+          for (final entry in data) {
+            if (entry is Map<String, dynamic>) {
+              final mapped = _parseRestaurantFromApi(entry);
+              if (mapped != null) {
+                parsed.add(mapped);
+              }
+            }
+          }
+          if (parsed.isNotEmpty && mounted) {
+            setState(() {
+              _restaurants = _mergeRestaurantLists(parsed);
+            });
+          }
+        }
+      } else {
+        debugPrint('Kon restaurants niet laden: ${res.statusCode} ${res.body}');
+      }
+    } catch (e) {
+      debugPrint('Kon restaurants niet laden: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingRestaurants = false;
+        });
+      }
+    }
+  }
+
+  Restaurant? _parseRestaurantFromApi(Map<String, dynamic> json) {
+    final rawId = (json['id'] ?? json['vendorId'] ?? '').toString().trim();
+    final rawName = (json['name'] ?? '').toString().trim();
+    if (rawId.isEmpty || rawName.isEmpty) {
+      return null;
+    }
+    final cuisine = (json['cuisine'] ?? json['description'] ?? 'Nog in te vullen')
+        .toString()
+        .trim();
+    final category = (json['category'] ?? 'Nieuw').toString().trim();
+    final eta = (json['eta'] ?? '35–45 min').toString().trim();
+    final ratingValue = double.tryParse((json['rating'] ?? '').toString());
+    final rating = ratingValue != null && ratingValue > 0 ? ratingValue : 4.5;
+    final minOrderRaw = json['minOrder'];
+    final minOrder = minOrderRaw is num ? minOrderRaw.toDouble() : 20.0;
+    final deliveryRaw = json['deliveryCost'];
+    final deliveryFee = deliveryRaw is num ? deliveryRaw.toDouble() : null;
+    final imageUrlRaw = (json['imageUrl'] ?? '').toString().trim();
+    final imageUrl = imageUrlRaw.isEmpty
+        ? 'https://images.unsplash.com/photo-1541542684-4abf21a55761?auto=format&fit=crop&w=1200&q=80'
+        : imageUrlRaw;
+
+    return Restaurant(
+      id: rawId,
+      name: rawName,
+      cuisine: cuisine.isEmpty ? 'Nog in te vullen' : cuisine,
+      category: category.isEmpty ? 'Nieuw' : category,
+      rating: rating,
+      eta: eta.isEmpty ? '35–45 min' : eta,
+      menu: const [],
+      imageUrl: imageUrl,
+      minOrder: minOrder > 0 ? minOrder : 20.0,
+      deliveryFee: deliveryFee,
+    );
+  }
+
+  List<Restaurant> _mergeRestaurantLists(List<Restaurant> fetched) {
+    final demoIds = demoRestaurants.map((r) => r.id).toSet();
+    final seen = <String>{};
+    final result = <Restaurant>[];
+
+    for (final restaurant in fetched) {
+      if (demoIds.contains(restaurant.id)) {
+        continue;
+      }
+      if (seen.add(restaurant.id)) {
+        result.add(restaurant);
+      }
+    }
+
+    for (final restaurant in demoRestaurants) {
+      if (seen.add(restaurant.id)) {
+        result.add(restaurant);
+      }
+    }
+
+    return result;
   }
 
   Future<void> _handleOrderPlaced(OrderSummary summary) async {
@@ -1016,12 +1287,32 @@ class _HapkeAppState extends State<HapkeApp> {
     _handlingUnauthorized = false;
   }
 
+  Widget _buildHome() {
+    return _RootTabs(
+      restaurants: _restaurants,
+      loadingRestaurants: _loadingRestaurants,
+      cartItems: _cart,
+      cartTotalCents: cartTotalCents,
+      onAdd: addToCart,
+      onUpdateQty: updateQty,
+      onClear: clearCart,
+      onLoggedIn: setSession,
+      onLogout: logout,
+      currentUser: _user,
+      authToken: _authToken,
+      onOrderPlaced: _handleOrderPlaced,
+      pendingOrderId: _pendingOrderId,
+      onTrackingCompleted: _handleOrderDelivered,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hapke',
       debugShowCheckedModeBanner: false,
       navigatorKey: appNavigatorKey,
+      initialRoute: '/',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -1074,27 +1365,38 @@ class _HapkeAppState extends State<HapkeApp> {
           showUnselectedLabels: true,
         ),
       ),
-      home: _RootTabs(
-        restaurants: demoRestaurants,
-        cartItems: _cart,
-        cartTotalCents: cartTotalCents,
-        onAdd: addToCart,
-        onUpdateQty: updateQty,
-        onClear: clearCart,
-        onLoggedIn: setSession,
-        onLogout: logout,
-        currentUser: _user,
-        authToken: _authToken,
-        onOrderPlaced: _handleOrderPlaced,
-        pendingOrderId: _pendingOrderId,
-        onTrackingCompleted: _handleOrderDelivered,
-      ),
+      onGenerateRoute: (settings) {
+        final name = (settings.name ?? '/').trim();
+        if (name.isEmpty || name == '/') {
+          return MaterialPageRoute(
+            builder: (_) => _buildHome(),
+            settings: settings,
+          );
+        }
+        final uri = Uri.tryParse(name.startsWith('/') ? name : '/$name');
+        if (uri != null) {
+          final segments =
+              uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
+          if (segments.length == 2 && segments.first == 'verify') {
+            final token = segments[1];
+            return MaterialPageRoute(
+              builder: (_) => VerifyAccountPage(token: token),
+              settings: settings,
+            );
+          }
+        }
+        return MaterialPageRoute(
+          builder: (_) => _buildHome(),
+          settings: settings,
+        );
+      },
     );
   }
 }
 
 class _RootTabs extends StatefulWidget {
   final List<Restaurant> restaurants;
+  final bool loadingRestaurants;
   final List<CartItem> cartItems;
   final int cartTotalCents;
   final void Function(Restaurant, MenuItem) onAdd;
@@ -1109,6 +1411,7 @@ class _RootTabs extends StatefulWidget {
   final String? pendingOrderId;
   const _RootTabs({
     required this.restaurants,
+    required this.loadingRestaurants,
     required this.cartItems,
     required this.cartTotalCents,
     required this.onAdd,
@@ -1268,11 +1571,24 @@ class _RootTabsState extends State<_RootTabs> {
     );
   }
 
+  Future<void> _openLogin() async {
+    final result = await Navigator.of(
+      context,
+    ).push<AuthSession>(MaterialPageRoute(builder: (_) => const LoginPage()));
+    if (result != null) {
+      widget.onLoggedIn(result);
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
       HomePage(
         restaurants: widget.restaurants,
+        loadingRestaurants: widget.loadingRestaurants,
         cartCount: widget.cartItems.fold(0, (n, ci) => n + ci.qty),
         currentUser: widget.currentUser,
         openCartModal: _openCartModal,
@@ -1288,6 +1604,8 @@ class _RootTabsState extends State<_RootTabs> {
         onAdd: widget.onAdd,
         cartItems: widget.cartItems,
         openCartModal: _openCartModal,
+        currentUser: widget.currentUser,
+        onLogin: _openLogin,
       ),
       CartPage(
         items: widget.cartItems,
@@ -1299,16 +1617,10 @@ class _RootTabsState extends State<_RootTabs> {
         onCheckout: () => _checkout(context),
         onClear: widget.onClear,
       ),
-      const FriendsTab(),
+      FriendsTab(currentUser: widget.currentUser, onLogin: _openLogin),
       _AccountTab(
         user: widget.currentUser,
-        onLogin: () async {
-          final result = await Navigator.of(context).push<AuthSession>(
-            MaterialPageRoute(builder: (_) => const LoginPage()),
-          );
-          if (result != null) widget.onLoggedIn(result);
-          setState(() {});
-        },
+        onLogin: _openLogin,
         onLogout: widget.onLogout,
       ),
     ];
@@ -1351,7 +1663,7 @@ class _RootTabsState extends State<_RootTabs> {
   }
 }
 
-class _AccountTab extends StatelessWidget {
+class _AccountTab extends StatefulWidget {
   final HapkeUser? user;
   final VoidCallback onLogin;
   final Future<void> Function()? onLogout;
@@ -1360,41 +1672,1000 @@ class _AccountTab extends StatelessWidget {
     required this.onLogin,
     required this.onLogout,
   });
+
+  @override
+  State<_AccountTab> createState() => _AccountTabState();
+}
+
+class _AccountTabState extends State<_AccountTab> {
+  static const Color primaryColor = Color(0xFF0A2342);
+  static const Color backgroundColor = Color(0xFFF4F7FB);
+  static const Color accentColor = Color(0xFFD64045);
+
+  bool _locationServicesEnabled = true;
+  bool _preciseLocationEnabled = true;
+  bool _saveLocationHistory = true;
+
+  String _selectedLanguage = 'Nederlands (NL)';
+
+  bool _pushNotifications = true;
+  bool _emailNotifications = true;
+  bool _smsNotifications = false;
+
+  late Map<String, int> _pollVotes;
+  String? _pollSelection;
+
+  @override
+  void initState() {
+    super.initState();
+    _pollVotes = {'Mc Donalds': 0, 'Mr. Shushi': 0, 'KFC': 0};
+  }
+
+  String get _notificationSummary {
+    final selections = <String>[];
+    if (_pushNotifications) selections.add('Push');
+    if (_emailNotifications) selections.add('E-mail');
+    if (_smsNotifications) selections.add('SMS');
+    if (selections.isEmpty) {
+      return 'Uitgeschakeld';
+    }
+    return selections.join(', ');
+  }
+
+  String get _pollSummary => _pollSelection == null
+      ? 'Stem op het volgende restaurant'
+      : 'Je stem: $_pollSelection';
+
+  Widget _buildQuickAction({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 18,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.09),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: primaryColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Bekijk en pas aan',
+              style: TextStyle(color: Color(0xFF6F7F99)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    VoidCallback? onTap,
+  }) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Container(
+            height: 44,
+            width: 44,
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.09),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: primaryColor),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: primaryColor,
+            ),
+          ),
+          subtitle: Text(
+            value,
+            style: const TextStyle(color: Color(0xFF6F7F99)),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: primaryColor),
+          onTap:
+              onTap ??
+              () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$title kan je binnenkort aanpassen'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              },
+        ),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
+      ],
+    );
+  }
+
+  Future<void> _openLocationSettings() async {
+    final result = await Navigator.of(context).push<LocationSettingsResult>(
+      MaterialPageRoute(
+        builder: (_) => LocationSettingsPage(
+          initial: LocationSettingsResult(
+            servicesEnabled: _locationServicesEnabled,
+            preciseEnabled: _preciseLocationEnabled,
+            historyEnabled: _saveLocationHistory,
+          ),
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _locationServicesEnabled = result.servicesEnabled;
+        _preciseLocationEnabled = result.preciseEnabled;
+        _saveLocationHistory = result.historyEnabled;
+      });
+    }
+  }
+
+  Future<void> _openLanguageSettings() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) =>
+            LanguageSettingsPage(initialLanguage: _selectedLanguage),
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      setState(() => _selectedLanguage = result);
+    }
+  }
+
+  Future<void> _openNotificationSettings() async {
+    final result = await Navigator.of(context).push<NotificationSettingsResult>(
+      MaterialPageRoute(
+        builder: (_) => NotificationSettingsPage(
+          initial: NotificationSettingsResult(
+            push: _pushNotifications,
+            email: _emailNotifications,
+            sms: _smsNotifications,
+          ),
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _pushNotifications = result.push;
+        _emailNotifications = result.email;
+        _smsNotifications = result.sms;
+      });
+    }
+  }
+
+  Future<void> _openPoll() async {
+    final result = await Navigator.of(context).push<RestaurantPollResult>(
+      MaterialPageRoute(
+        builder: (_) => RestaurantPollPage(
+          initialChoice: _pollSelection,
+          initialVotes: _pollVotes,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _pollSelection = result.selectedOption;
+        _pollVotes = Map<String, int>.from(result.votes);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = widget.user;
+
     if (user == null) {
-      return Center(
+      return Container(
+        color: backgroundColor,
+        alignment: Alignment.center,
         child: ElevatedButton.icon(
-          onPressed: onLogin,
+          onPressed: widget.onLogin,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
           icon: const Icon(Icons.login),
           label: const Text('Inloggen / Aanmelden'),
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          Text(
-            'Welkom, ${user!.name}',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 12),
-          Text('${user!.email}\n${user!.phone}\n${user!.address}'),
-          const Spacer(),
-          ElevatedButton.icon(
-            onPressed: onLogout == null
-                ? null
-                : () async {
-                    await onLogout!();
+
+    final displayName = user.name.trim().isEmpty ? user.email : user.name;
+    final initials = displayName.trim().isNotEmpty
+        ? displayName.trim().substring(0, 1).toUpperCase()
+        : '?';
+
+    return Container(
+      color: backgroundColor,
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 26, 20, 32),
+          children: [
+            const Text(
+              'Account',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 22,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hé, ${displayName.split(' ').first}!',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          user.email,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Color(0xFF6F7F99),
+                          ),
+                        ),
+                        if (user.phone.trim().isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            user.phone,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF6F7F99),
+                            ),
+                          ),
+                        ],
+                        if (user.address.trim().isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            user.address,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF6F7F99),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: primaryColor,
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            InkWell(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Support opent binnenkort'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(24),
+              child: Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  children: const [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white24,
+                      child: Icon(
+                        Icons.headset_mic_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hulp nodig? Wij zijn er voor je',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Tap hier en we helpen je meteen verder.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Je account',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.person_outline,
+                    title: 'Persoonlijke gegevens',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Gegevens wijzigen komt eraan'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.location_on_outlined,
+                    title: 'Bezorgadressen',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Adressen beheren komt eraan'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+            const Text(
+              'Instellingen',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 20,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildSettingTile(
+                    icon: Icons.my_location_outlined,
+                    title: 'Locatieservices',
+                    value: _locationServicesEnabled ? 'Aan' : 'Uit',
+                    onTap: _openLocationSettings,
+                  ),
+                  _buildSettingTile(
+                    icon: Icons.language_outlined,
+                    title: 'Taal',
+                    value: _selectedLanguage,
+                    onTap: _openLanguageSettings,
+                  ),
+                  _buildSettingTile(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notificaties',
+                    value: _notificationSummary,
+                    onTap: _openNotificationSettings,
+                  ),
+                  _buildSettingTile(
+                    icon: Icons.poll_outlined,
+                    title: 'Stem mee',
+                    value: _pollSummary,
+                    onTap: _openPoll,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            ElevatedButton.icon(
+              onPressed: widget.onLogout == null
+                  ? null
+                  : () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      await widget.onLogout!();
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Je bent uitgelogd'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentColor,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.logout),
+              label: const Text(
+                'Uitloggen',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LocationSettingsResult {
+  final bool servicesEnabled;
+  final bool preciseEnabled;
+  final bool historyEnabled;
+
+  const LocationSettingsResult({
+    required this.servicesEnabled,
+    required this.preciseEnabled,
+    required this.historyEnabled,
+  });
+}
+
+class LocationSettingsPage extends StatefulWidget {
+  final LocationSettingsResult initial;
+  const LocationSettingsPage({super.key, required this.initial});
+
+  @override
+  State<LocationSettingsPage> createState() => _LocationSettingsPageState();
+}
+
+class _LocationSettingsPageState extends State<LocationSettingsPage> {
+  late bool _servicesEnabled;
+  late bool _preciseEnabled;
+  late bool _historyEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _servicesEnabled = widget.initial.servicesEnabled;
+    _preciseEnabled = widget.initial.preciseEnabled;
+    _historyEnabled = widget.initial.historyEnabled;
+  }
+
+  void _close() {
+    Navigator.of(context).pop(
+      LocationSettingsResult(
+        servicesEnabled: _servicesEnabled,
+        preciseEnabled: _preciseEnabled,
+        historyEnabled: _historyEnabled,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _close();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Locatieservices'),
+          actions: [TextButton(onPressed: _close, child: const Text('Gereed'))],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text(
+              'Bepaal hoe Hapke je locatie gebruikt om sneller te bezorgen.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Locatie delen met Hapke'),
+              subtitle: const Text(
+                'Nodig voor bezorging en lokale acties in je buurt.',
+              ),
+              value: _servicesEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _servicesEnabled = value;
+                  if (!value) {
+                    _preciseEnabled = false;
+                    _historyEnabled = false;
+                  }
+                });
+              },
+            ),
+            SwitchListTile(
+              title: const Text('Precisie-locatie'),
+              subtitle: const Text(
+                'Gebruik GPS voor nauwkeurige bezorgupdates.',
+              ),
+              value: _preciseEnabled,
+              onChanged: _servicesEnabled
+                  ? (value) => setState(() => _preciseEnabled = value)
+                  : null,
+            ),
+            SwitchListTile(
+              title: const Text('Locatiegeschiedenis opslaan'),
+              subtitle: const Text(
+                'Handig om sneller op je favoriete adressen te bestellen.',
+              ),
+              value: _historyEnabled,
+              onChanged: _servicesEnabled
+                  ? (value) => setState(() => _historyEnabled = value)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LanguageSettingsPage extends StatefulWidget {
+  final String initialLanguage;
+  const LanguageSettingsPage({super.key, required this.initialLanguage});
+
+  @override
+  State<LanguageSettingsPage> createState() => _LanguageSettingsPageState();
+}
+
+class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
+  late String _selectedLanguage;
+  late final List<String> _languages;
+
+  @override
+  void initState() {
+    super.initState();
+    _languages = [
+      'Nederlands (NL)',
+      'Nederlands (BE)',
+      'Engels (EN)',
+      'Duits (DE)',
+    ];
+    _selectedLanguage = widget.initialLanguage;
+    if (!_languages.contains(_selectedLanguage)) {
+      _languages.insert(0, _selectedLanguage);
+    }
+  }
+
+  void _close() {
+    Navigator.of(context).pop(_selectedLanguage);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _close();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Taal'),
+          actions: [TextButton(onPressed: _close, child: const Text('Gereed'))],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text(
+              'Kies de taal voor de app en onze communicatie.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ..._languages.map(
+              (language) => Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: RadioListTile<String>(
+                  title: Text(language),
+                  value: language,
+                  groupValue: _selectedLanguage,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedLanguage = value);
+                    }
                   },
-            icon: const Icon(Icons.logout),
-            label: const Text('Uitloggen'),
-          ),
-          const SizedBox(height: 20),
-        ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NotificationSettingsResult {
+  final bool push;
+  final bool email;
+  final bool sms;
+
+  const NotificationSettingsResult({
+    required this.push,
+    required this.email,
+    required this.sms,
+  });
+}
+
+class NotificationSettingsPage extends StatefulWidget {
+  final NotificationSettingsResult initial;
+  const NotificationSettingsPage({super.key, required this.initial});
+
+  @override
+  State<NotificationSettingsPage> createState() =>
+      _NotificationSettingsPageState();
+}
+
+class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
+  late bool _push;
+  late bool _email;
+  late bool _sms;
+
+  @override
+  void initState() {
+    super.initState();
+    _push = widget.initial.push;
+    _email = widget.initial.email;
+    _sms = widget.initial.sms;
+  }
+
+  void _close() {
+    Navigator.of(
+      context,
+    ).pop(NotificationSettingsResult(push: _push, email: _email, sms: _sms));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _close();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Notificaties'),
+          actions: [TextButton(onPressed: _close, child: const Text('Gereed'))],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text(
+              'Stel in hoe wij je op de hoogte houden van bestellingen en acties.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Pushberichten'),
+              subtitle: const Text('Live updates over bezorging en promoties.'),
+              value: _push,
+              onChanged: (value) => setState(() => _push = value),
+            ),
+            SwitchListTile(
+              title: const Text('E-mail'),
+              subtitle: const Text(
+                'Ontvang samenvattingen en exclusieve deals.',
+              ),
+              value: _email,
+              onChanged: (value) => setState(() => _email = value),
+            ),
+            SwitchListTile(
+              title: const Text('SMS'),
+              subtitle: const Text(
+                'Korte statusupdates over je bezorging en acties.',
+              ),
+              value: _sms,
+              onChanged: (value) => setState(() => _sms = value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RestaurantPollResult {
+  final String? selectedOption;
+  final Map<String, int> votes;
+
+  const RestaurantPollResult({
+    required this.selectedOption,
+    required this.votes,
+  });
+}
+
+class RestaurantPollPage extends StatefulWidget {
+  final Map<String, int> initialVotes;
+  final String? initialChoice;
+  const RestaurantPollPage({
+    super.key,
+    required this.initialVotes,
+    this.initialChoice,
+  });
+
+  @override
+  State<RestaurantPollPage> createState() => _RestaurantPollPageState();
+}
+
+class _RestaurantPollPageState extends State<RestaurantPollPage> {
+  static const List<String> _options = ['Mc Donalds', 'Mr. Shushi', 'KFC'];
+
+  late Map<String, int> _votes;
+  String? _selected;
+  String? _confirmed;
+
+  @override
+  void initState() {
+    super.initState();
+    _votes = {
+      for (final option in _options) option: widget.initialVotes[option] ?? 0,
+    };
+    _confirmed = widget.initialChoice;
+    _selected = widget.initialChoice;
+  }
+
+  int get _totalVotes =>
+      _votes.values.fold<int>(0, (sum, value) => sum + value);
+
+  void _submitVote() {
+    if (_selected == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kies eerst een restaurant om op te stemmen'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      if (_confirmed != null && _confirmed != _selected) {
+        final current = _votes[_confirmed!] ?? 0;
+        if (current > 0) {
+          _votes[_confirmed!] = current - 1;
+        }
+      }
+      if (_confirmed != _selected) {
+        _votes[_selected!] = (_votes[_selected!] ?? 0) + 1;
+      }
+      _confirmed = _selected;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Bedankt voor je stem!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _clearVote() {
+    if (_confirmed == null) {
+      return;
+    }
+
+    setState(() {
+      final current = _votes[_confirmed!] ?? 0;
+      if (current > 0) {
+        _votes[_confirmed!] = current - 1;
+      }
+      _confirmed = null;
+      _selected = null;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Je stem is verwijderd'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _close() {
+    Navigator.of(context).pop(
+      RestaurantPollResult(
+        selectedOption: _confirmed,
+        votes: Map<String, int>.from(_votes),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _close();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Stem op het volgende restaurant'),
+          actions: [TextButton(onPressed: _close, child: const Text('Gereed'))],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text(
+              'Kies welk restaurant jij als eerste in de app wilt zien. '
+              'We voegen de winnaar als volgende toe.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ..._options.map(
+              (option) => Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: RadioListTile<String>(
+                  title: Text(option),
+                  subtitle: Text('${_votes[option]} stemmen'),
+                  value: option,
+                  groupValue: _selected,
+                  onChanged: (value) => setState(() => _selected = value),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _submitVote,
+                    child: const Text('Stem'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _confirmed == null ? null : _clearVote,
+                    child: const Text('Verwijder stem'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Tussenstand',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            ..._options.map((option) {
+              final count = _votes[option] ?? 0;
+              final total = _totalVotes;
+              final double progress = total == 0 ? 0 : count / total;
+              final percentage = total == 0 ? 0 : (progress * 100).round();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$option · $count stem${count == 1 ? '' : 'men'}'),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: progress.clamp(0.0, 1.0).toDouble(),
+                        minHeight: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('$percentage%'),
+                  ],
+                ),
+              );
+            }).toList(),
+            if (_totalVotes == 0)
+              const Text(
+                'Nog geen stemmen — jij kunt de eerste zijn!',
+                style: TextStyle(color: Color(0xFF6F7F99)),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1403,6 +2674,7 @@ class _AccountTab extends StatelessWidget {
 /// ---------------- Screens ----------------
 class HomePage extends StatefulWidget {
   final List<Restaurant> restaurants;
+  final bool loadingRestaurants;
   final int cartCount;
   final HapkeUser? currentUser;
   final Future<void> Function(BuildContext) openCartModal;
@@ -1416,6 +2688,7 @@ class HomePage extends StatefulWidget {
   const HomePage({
     super.key,
     required this.restaurants,
+    required this.loadingRestaurants,
     required this.cartCount,
     required this.currentUser,
     required this.openCartModal,
@@ -1495,9 +2768,9 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF0A2342),
         clipBehavior: Clip.none,
         title: Transform.scale(
-          scale: 1.4,
+          scale: 1.15,
           child: SizedBox(
-            height: kToolbarHeight,
+            height: kToolbarHeight * 0.88,
             child: Image.asset(
               'assets/icons/hapke_logo.png',
               fit: BoxFit.contain,
@@ -1524,232 +2797,294 @@ class _HomePageState extends State<HomePage> {
               onTap: () => _openCart(context),
             ),
       body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            backgroundColor: const Color(0xFF0A2342),
-            iconTheme: const IconThemeData(color: Colors.white),
-            titleTextStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+        slivers: () {
+          final slivers = <Widget>[
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              backgroundColor: const Color(0xFF0A2342),
+              iconTheme: const IconThemeData(color: Colors.white),
+              titleTextStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+              title: _SearchPill(onChanged: (v) => setState(() => _query = v)),
             ),
-            title: _SearchPill(onChanged: (v) => setState(() => _query = v)),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 50,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: [
-                  _CategoryChip(
-                    label: 'Cafetaria',
-                    iconUrl: _chipIcons['Cafetaria'],
-                    selected: _selectedCategory == 'Cafetaria',
-                    onSelected: () => setState(
-                      () => _selectedCategory == 'Cafetaria'
-                          ? _selectedCategory = null
-                          : _selectedCategory = 'Cafetaria',
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: [
+                    _CategoryChip(
+                      label: 'Cafetaria',
+                      iconUrl: _chipIcons['Cafetaria'],
+                      selected: _selectedCategory == 'Cafetaria',
+                      onSelected: () => setState(
+                        () => _selectedCategory == 'Cafetaria'
+                            ? _selectedCategory = null
+                            : _selectedCategory = 'Cafetaria',
+                      ),
                     ),
-                  ),
-                  _CategoryChip(
-                    label: 'Sushi',
-                    iconUrl: _chipIcons['Sushi'],
-                    selected: _selectedCategory == 'Sushi',
-                    onSelected: () => setState(
-                      () => _selectedCategory == 'Sushi'
-                          ? _selectedCategory = null
-                          : _selectedCategory = 'Sushi',
+                    _CategoryChip(
+                      label: 'Sushi',
+                      iconUrl: _chipIcons['Sushi'],
+                      selected: _selectedCategory == 'Sushi',
+                      onSelected: () => setState(
+                        () => _selectedCategory == 'Sushi'
+                            ? _selectedCategory = null
+                            : _selectedCategory = 'Sushi',
+                      ),
                     ),
-                  ),
-                  _CategoryChip(
-                    label: 'Gezond',
-                    iconUrl: _chipIcons['Gezond'],
-                    selected: _selectedCategory == 'Gezond',
-                    onSelected: () => setState(
-                      () => _selectedCategory == 'Gezond'
-                          ? _selectedCategory = null
-                          : _selectedCategory = 'Gezond',
+                    _CategoryChip(
+                      label: 'Gezond',
+                      iconUrl: _chipIcons['Gezond'],
+                      selected: _selectedCategory == 'Gezond',
+                      onSelected: () => setState(
+                        () => _selectedCategory == 'Gezond'
+                            ? _selectedCategory = null
+                            : _selectedCategory = 'Gezond',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((context, i) {
-              final r = filtered[i];
-              return InkWell(
-                onTap: () => _openRestaurant(context, r),
+          ];
+
+          if (widget.loadingRestaurants) {
+            slivers.add(
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ),
+            );
+          } else if (filtered.isEmpty) {
+            slivers.add(
+              SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: 16,
+                    vertical: 40,
                   ),
-                  child: Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Hero(
-                                  tag: 'rest_${r.id}',
-                                  child: Image.network(
-                                    r.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const ColoredBox(
-                                          color: Colors.black12,
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.storefront,
-                                              size: 40,
-                                            ),
-                                          ),
-                                        ),
-                                  ),
-                                ),
-                                Positioned(
-                                  left: 8,
-                                  right: 8,
-                                  bottom: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black54,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.star,
-                                              size: 16,
-                                              color: Colors.amber,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              r.rating.toStringAsFixed(1),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            const Icon(
-                                              Icons.timer,
-                                              size: 16,
-                                              color: Colors.white,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              r.eta,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Wrap(
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          spacing: 12,
-                                          runSpacing: 4,
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons
-                                                      .shopping_basket_outlined,
-                                                  size: 16,
-                                                  color: Colors.white,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'Min. ' +
-                                                      _formatEuros(r.minOrder),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons.pedal_bike,
-                                                  size: 16,
-                                                  color: Colors.white,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  r.deliveryFee == null
-                                                      ? 'Gratis bezorging'
-                                                      : _formatEuros(
-                                                              r.deliveryFee!,
-                                                            ) +
-                                                            ' bezorging',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                  child: Column(
+                    children: const [
+                      Icon(
+                        Icons.restaurant_outlined,
+                        size: 48,
+                        color: Colors.black38,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Nog geen restaurants gevonden',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                r.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                r.cuisine,
-                                style: TextStyle(color: Colors.grey.shade800),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Nieuwe restaurants melden zich aan via het portal en verschijnen hier automatisch.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            }, childCount: filtered.length),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+              ),
+            );
+          } else {
+            slivers.add(
+              SliverList(
+                delegate: SliverChildBuilderDelegate((context, i) {
+                  final r = filtered[i];
+                  return InkWell(
+                    onTap: () => _openRestaurant(context, r),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Card(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Hero(
+                                      tag: 'rest_${r.id}',
+                                      child: Image.network(
+                                        r.imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const ColoredBox(
+                                              color: Colors.black12,
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.storefront,
+                                                  size: 40,
+                                                ),
+                                              ),
+                                            ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 8,
+                                      right: 8,
+                                      bottom: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.star,
+                                                  size: 16,
+                                                  color: Colors.amber,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  r.rating
+                                                      .toStringAsFixed(1),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                const Icon(
+                                                  Icons.timer,
+                                                  size: 16,
+                                                  color: Colors.white,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  r.eta,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Wrap(
+                                              crossAxisAlignment:
+                                                  WrapCrossAlignment.center,
+                                              spacing: 12,
+                                              runSpacing: 4,
+                                              children: [
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons
+                                                          .shopping_basket_outlined,
+                                                      size: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      'Min. ' +
+                                                          _formatEuros(
+                                                            r.minOrder,
+                                                          ),
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.pedal_bike,
+                                                      size: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      r.deliveryFee == null
+                                                          ? 'Gratis bezorging'
+                                                          : _formatEuros(
+                                                                  r.deliveryFee!,
+                                                                ) +
+                                                                ' bezorging',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    r.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    r.cuisine,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }, childCount: filtered.length),
+              ),
+            );
+          }
+
+          slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 100)));
+          return slivers;
+        }(),
       ),
     );
   }
@@ -1967,6 +3302,21 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                ],
+                if (widget.restaurant.menu.isEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Het menu van dit restaurant wordt binnenkort aangevuld. Houd Hapke in de gaten!',
+                      style: TextStyle(color: Colors.black87),
                     ),
                   ),
                 ],
@@ -2299,6 +3649,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       'items': _itemPayload,
       'paymentId': paymentId,
       if (widget.email != null) 'email': widget.email,
+      if (widget.items.isNotEmpty) 'restaurantId': widget.items.first.restaurant.id,
     };
     debugPrint('HAPKE ORDER ➜ POST $apiBase/orders body=${jsonEncode(body)}');
     try {
@@ -3104,6 +4455,202 @@ class CartPage extends StatelessWidget {
 }
 
 /// ---------------- Login ----------------
+class VerifyAccountPage extends StatefulWidget {
+  final String token;
+  const VerifyAccountPage({super.key, required this.token});
+
+  @override
+  State<VerifyAccountPage> createState() => _VerifyAccountPageState();
+}
+
+class _VerifyAccountPageState extends State<VerifyAccountPage> {
+  bool _loading = true;
+  bool _success = false;
+  bool _alreadyVerified = false;
+  String? _message;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _verify();
+  }
+
+  Future<void> _verify() async {
+    setState(() {
+      _loading = true;
+      _success = false;
+      _alreadyVerified = false;
+      _message = null;
+      _error = null;
+    });
+
+    final encodedToken = Uri.encodeComponent(widget.token);
+    final uri = Uri.parse('$apiBase/auth/verify/$encodedToken');
+
+    try {
+      final res = await apiClient.post(uri);
+      if (!mounted) return;
+      final data = _tryParseJson(res.body);
+      if (res.statusCode == 200) {
+        final msg =
+            (data?['message'] ?? 'Je account is geactiveerd!').toString();
+        final already =
+            data?['alreadyVerified'] is bool ? data?['alreadyVerified'] : false;
+        setState(() {
+          _loading = false;
+          _success = true;
+          _alreadyVerified = already == true;
+          _message = msg;
+        });
+      } else {
+        final msg = (data?['message'] ??
+                'Verificatie mislukt (${res.statusCode}).')
+            .toString();
+        setState(() {
+          _loading = false;
+          _success = false;
+          _error = msg;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _success = false;
+        _error = 'Verificatie mislukt: $e';
+      });
+    }
+  }
+
+  Map<String, dynamic>? _tryParseJson(String body) {
+    if (body.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+    } catch (_) {
+      // ignore parse errors
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final successTitle =
+        _alreadyVerified ? 'Account is al geactiveerd' : 'Je account is geactiveerd!';
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Account verifiëren')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: _loading
+                  ? Column(
+                      key: const ValueKey('loading'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Je account wordt geactiveerd...'),
+                      ],
+                    )
+                  : _success
+                      ? Column(
+                          key: const ValueKey('success'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.green.shade600,
+                              size: 72,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              successTitle,
+                              style: theme.textTheme.headlineSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _message ?? 'Je account is geactiveerd!',
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/',
+                                  (route) => false,
+                                );
+                              },
+                              child: const Text('Ga naar Hapke'),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Inloggen'),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          key: const ValueKey('error'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red.shade600,
+                              size: 72,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Verificatie mislukt',
+                              style: theme.textTheme.headlineSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            if (_error != null)
+                              Text(
+                                _error!,
+                                textAlign: TextAlign.center,
+                              ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: _verify,
+                              child: const Text('Probeer opnieuw'),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).pushNamedAndRemoveUntil(
+                                  '/',
+                                  (route) => false,
+                                );
+                              },
+                              child: const Text('Terug naar home'),
+                            ),
+                          ],
+                        ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -3118,9 +4665,11 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
-  String? _gender; // Man, Vrouw, Anders, Zeg ik liever niet
+
+  String? _gender;
   bool _loading = false;
   String? _error;
+  bool _isLogin = true;
 
   @override
   void dispose() {
@@ -3142,71 +4691,10 @@ class _LoginPageState extends State<LoginPage> {
       _error = null;
     });
 
-    Future<AuthSession?> tryAuthenticate() async {
-      final headers = {'Content-Type': 'application/json'};
-      final registerBody = jsonEncode({'email': email, 'password': password});
+    final session = _isLogin
+        ? await _performLogin(email, password)
+        : await _registerAndLogin(email, password);
 
-      http.Response res;
-      try {
-        res = await apiClient.post(
-          Uri.parse('$apiBase/auth/register'),
-          headers: headers,
-          body: registerBody,
-        );
-      } catch (e) {
-        _error = 'Kan server niet bereiken: $e';
-        return null;
-      }
-
-      // Treat 200 or 201 as success for register
-      if (res.statusCode == 200 || res.statusCode == 201) {
-        final sessionFromRegister = _parseAuthResponse(res.body);
-        // If register doesn't return a token, immediately log in
-        if (sessionFromRegister.token.isEmpty) {
-          try {
-            final loginRes = await apiClient.post(
-              Uri.parse('$apiBase/auth/login'),
-              headers: headers,
-              body: registerBody,
-            );
-            if (loginRes.statusCode == 200) {
-              return _parseAuthResponse(loginRes.body);
-            } else {
-              _error =
-                  'Inloggen na registreren mislukt (${loginRes.statusCode})';
-              return null;
-            }
-          } catch (e) {
-            _error = 'Inloggen na registreren mislukt: $e';
-            return null;
-          }
-        }
-        return sessionFromRegister;
-      }
-
-      // If already exists or bad request, try login directly
-      if (res.statusCode == 400 || res.statusCode == 409) {
-        try {
-          final loginRes = await apiClient.post(
-            Uri.parse('$apiBase/auth/login'),
-            headers: headers,
-            body: registerBody,
-          );
-          if (loginRes.statusCode == 200) {
-            return _parseAuthResponse(loginRes.body);
-          }
-          _error = 'Inloggen mislukt (${loginRes.statusCode})';
-        } catch (e) {
-          _error = 'Inloggen mislukt: $e';
-        }
-        return null;
-      }
-
-      _error = 'Registreren mislukt (${res.statusCode})';
-      return null;
-    }
-
-    final session = await tryAuthenticate();
     if (!mounted) return;
 
     if (session != null) {
@@ -3229,6 +4717,62 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<AuthSession?> _performLogin(String email, String password) async {
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'email': email, 'password': password});
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/auth/login'),
+        headers: headers,
+        body: body,
+      );
+      if (res.statusCode == 200) {
+        return _parseAuthResponse(res.body);
+      }
+      final data = _parseJson(res.body);
+      final message = data?['message']?.toString();
+      _error = (message != null && message.trim().isNotEmpty)
+          ? message
+          : 'Inloggen mislukt (${res.statusCode})';
+    } catch (e) {
+      _error = 'Inloggen mislukt: $e';
+    }
+    return null;
+  }
+
+  Future<AuthSession?> _registerAndLogin(String email, String password) async {
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({'email': email, 'password': password});
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/auth/register'),
+        headers: headers,
+        body: body,
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = _parseJson(res.body);
+        final requiresVerification = data?['requiresVerification'] == true;
+        if (requiresVerification) {
+          _error =
+              'Account aangemaakt. Controleer je e-mail om je account te activeren.';
+          return null;
+        }
+        return await _performLogin(email, password);
+      }
+      if (res.statusCode == 400 || res.statusCode == 409) {
+        return await _performLogin(email, password);
+      }
+      final data = _parseJson(res.body);
+      final message = data?['message']?.toString();
+      _error = (message != null && message.trim().isNotEmpty)
+          ? message
+          : 'Registreren mislukt (${res.statusCode})';
+    } catch (e) {
+      _error = 'Registreren mislukt: $e';
+    }
+    return null;
+  }
+
   AuthSession _parseAuthResponse(String body) {
     final data = jsonDecode(body) as Map<String, dynamic>;
     final userData = data['user'] as Map<String, dynamic>? ?? const {};
@@ -3236,38 +4780,57 @@ class _LoginPageState extends State<LoginPage> {
         data['access_token'] ?? data['accessToken'] ?? data['token'] ?? '';
     final token = tokenValue.toString();
 
+    final userId = (userData['id'] ?? '').toString();
     final user = HapkeUser(
-      name: _nameCtrl.text.trim().isNotEmpty
-          ? _nameCtrl.text.trim()
-          : (userData['name'] ?? '') as String? ?? '',
+      id: userId,
+      name: (userData['name'] ?? '').toString().trim().isNotEmpty
+          ? userData['name'].toString()
+          : _nameCtrl.text.trim(),
       email: (userData['email'] ?? _emailCtrl.text.trim()).toString(),
-      phone: _phoneCtrl.text.trim(),
-      address: _addressCtrl.text.trim(),
-      gender: _gender ?? 'Zeg ik liever niet',
+      phone: (userData['phone'] ?? _phoneCtrl.text.trim()).toString(),
+      address: (userData['address'] ?? _addressCtrl.text.trim()).toString(),
+      gender:
+          _gender ?? (userData['gender'] ?? 'Zeg ik liever niet').toString(),
     );
 
     return AuthSession(user: user, token: token);
   }
 
+  Map<String, dynamic>? _parseJson(String body) {
+    if (body.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+    } catch (_) {
+      // ignore invalid json
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inloggen / Aanmelden')),
+      appBar: AppBar(title: Text(_isLogin ? 'Inloggen' : 'Account aanmaken')),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Naam',
-                border: OutlineInputBorder(),
+            if (!_isLogin) ...[
+              TextFormField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Naam',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => _isLogin || (v != null && v.trim().isNotEmpty)
+                    ? null
+                    : 'Vul je naam in',
               ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Vul je naam in' : null,
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ],
             TextFormField(
               controller: _emailCtrl,
               decoration: const InputDecoration(
@@ -3294,56 +4857,83 @@ class _LoginPageState extends State<LoginPage> {
                   : null,
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              controller: _phoneCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Mobiel nummer',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
-              validator: (v) => (v == null || v.trim().length < 6)
-                  ? 'Vul een geldig nummer in'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _addressCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Adres',
-                border: OutlineInputBorder(),
-              ),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Vul je adres in' : null,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _gender,
-              items: const [
-                DropdownMenuItem(value: 'Man', child: Text('Man')),
-                DropdownMenuItem(value: 'Vrouw', child: Text('Vrouw')),
-                DropdownMenuItem(value: 'Anders', child: Text('Anders')),
-                DropdownMenuItem(
-                  value: 'Zeg ik liever niet',
-                  child: Text('Zeg ik liever niet'),
+            if (!_isLogin) ...[
+              TextFormField(
+                controller: _phoneCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Mobiel nummer',
+                  border: OutlineInputBorder(),
                 ),
-              ],
-              onChanged: (v) => setState(() => _gender = v),
-              decoration: const InputDecoration(
-                labelText: 'Geslacht',
-                border: OutlineInputBorder(),
+                keyboardType: TextInputType.phone,
+                validator: (v) =>
+                    _isLogin || (v != null && v.trim().length >= 6)
+                    ? null
+                    : 'Vul een geldig nummer in',
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _addressCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Adres',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (v) => _isLogin || (v != null && v.trim().isNotEmpty)
+                    ? null
+                    : 'Vul je adres in',
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _gender,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Geslacht',
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Man', child: Text('Man')),
+                  DropdownMenuItem(value: 'Vrouw', child: Text('Vrouw')),
+                  DropdownMenuItem(value: 'Anders', child: Text('Anders')),
+                  DropdownMenuItem(
+                    value: 'Zeg ik liever niet',
+                    child: Text('Zeg ik liever niet'),
+                  ),
+                ],
+                onChanged: (value) => setState(() => _gender = value),
+                validator: (v) => _isLogin || (v != null && v.isNotEmpty)
+                    ? null
+                    : 'Maak een keuze',
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            ElevatedButton(
               onPressed: _loading ? null : _submit,
-              icon: _loading
+              child: _loading
                   ? const SizedBox(
                       height: 18,
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.login),
-              label: const Text('Aanmelden'),
+                  : Text(_isLogin ? 'Inloggen' : 'Account aanmaken'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: _loading
+                  ? null
+                  : () {
+                      setState(() {
+                        _isLogin = !_isLogin;
+                        _error = null;
+                      });
+                    },
+              child: Text(
+                _isLogin
+                    ? 'Nog geen account? Registreren'
+                    : 'Ik heb al een account - Inloggen',
+              ),
             ),
           ],
         ),
@@ -3629,12 +5219,16 @@ class VideosTab extends StatefulWidget {
   final void Function(Restaurant, MenuItem) onAdd;
   final List<CartItem> cartItems;
   final Future<void> Function(BuildContext) openCartModal;
+  final HapkeUser? currentUser;
+  final Future<void> Function()? onLogin;
   const VideosTab({
     super.key,
     required this.restaurants,
     required this.onAdd,
     required this.cartItems,
     required this.openCartModal,
+    this.currentUser,
+    this.onLogin,
   });
 
   @override
@@ -3727,13 +5321,56 @@ class _VideosTabState extends State<VideosTab> {
     Restaurant r,
     MenuItem? m,
   ) async {
+    if (widget.currentUser == null) {
+      await widget.onLogin?.call();
+      return;
+    }
     if (m == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Geen gerecht geselecteerd')),
       );
       return;
     }
-    String? selected;
+    List<FriendSummary> friends = const <FriendSummary>[];
+    try {
+      final res = await apiClient.get(
+        Uri.parse('$apiBase/friends'),
+        headers: {'Accept': 'application/json'},
+      );
+      if (res.statusCode == 401) {
+        await widget.onLogin?.call();
+        return;
+      }
+      if (res.statusCode != 200) {
+        throw Exception(extractErrorMessage(res));
+      }
+      final decoded = jsonDecode(res.body);
+      if (decoded is List) {
+        friends = decoded
+            .whereType<Map<String, dynamic>>()
+            .map(FriendSummary.fromJson)
+            .where((f) => f.user.id.isNotEmpty)
+            .toList();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Kon vrienden niet ophalen: $e')));
+      return;
+    }
+
+    if (friends.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Je hebt nog geen vrienden om dit mee te delen'),
+        ),
+      );
+      return;
+    }
+
+    String? selectedId;
     await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -3752,13 +5389,14 @@ class _VideosTabState extends State<VideosTab> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
-              for (final f in AppInbox.friends)
+              for (final f in friends)
                 RadioListTile<String>(
-                  title: Text(f),
-                  value: f,
-                  groupValue: selected,
+                  title: Text(f.user.displayName),
+                  subtitle: Text(f.user.email),
+                  value: f.user.id,
+                  groupValue: selectedId,
                   onChanged: (v) {
-                    selected = v;
+                    selectedId = v;
                     Navigator.pop(ctx);
                   },
                 ),
@@ -3768,16 +5406,54 @@ class _VideosTabState extends State<VideosTab> {
         );
       },
     );
-    if (selected != null) {
-      final text =
-          'Deel: ${r.name} • ${m.name} • ${_formatPrice(m.priceCents)}';
-      AppInbox.sendToFriend(selected!, text);
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Verstuurd naar $selected')));
-        setState(() {});
+    if (selectedId == null) {
+      return;
+    }
+
+    final friend = friends.firstWhere(
+      (f) => f.user.id == selectedId,
+      orElse: () => friends.first,
+    );
+    final message =
+        'Deel: ${r.name} • ${m.name} • ${_formatPrice(m.priceCents)}';
+    try {
+      final chatRes = await apiClient.post(
+        Uri.parse('$apiBase/chats/direct/${friend.user.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({}),
+      );
+      if (chatRes.statusCode != 200 && chatRes.statusCode != 201) {
+        throw Exception(extractErrorMessage(chatRes));
       }
+      final chatJson = jsonDecode(chatRes.body);
+      if (chatJson is! Map<String, dynamic>) {
+        throw Exception('Ongeldig antwoord van server');
+      }
+      final thread = ChatThread.fromJson(chatJson, widget.currentUser!.id);
+
+      final sendRes = await apiClient.post(
+        Uri.parse('$apiBase/chats/${thread.id}/messages'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'content': message}),
+      );
+      if (sendRes.statusCode != 200 && sendRes.statusCode != 201) {
+        throw Exception(extractErrorMessage(sendRes));
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Verstuurd naar ${friend.user.displayName}')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Kon niet versturen: $e')));
     }
   }
 
@@ -3789,9 +5465,9 @@ class _VideosTabState extends State<VideosTab> {
         backgroundColor: const Color(0xFF0A2342),
         clipBehavior: Clip.none,
         title: Transform.scale(
-          scale: 1.4,
+          scale: 1.15,
           child: SizedBox(
-            height: kToolbarHeight,
+            height: kToolbarHeight * 0.88,
             child: Image.asset(
               'assets/icons/hapke_logo.png',
               fit: BoxFit.contain,
@@ -4143,172 +5819,769 @@ class _RoundIconButton extends StatelessWidget {
 }
 
 class FriendsTab extends StatefulWidget {
-  const FriendsTab({super.key});
+  final HapkeUser? currentUser;
+  final Future<void> Function()? onLogin;
+  const FriendsTab({super.key, required this.currentUser, this.onLogin});
+
   @override
   State<FriendsTab> createState() => _FriendsTabState();
 }
 
 class _FriendsTabState extends State<FriendsTab> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  bool _loading = false;
+  bool _searching = false;
+  String? _error;
+  List<FriendSummary> _friends = const <FriendSummary>[];
+  List<FriendRequestSummary> _incoming = const <FriendRequestSummary>[];
+  List<FriendRequestSummary> _outgoing = const <FriendRequestSummary>[];
+  List<FriendSearchResult> _searchResults = const <FriendSearchResult>[];
+
   @override
   void initState() {
     super.initState();
-    AppInbox.tick.addListener(_onInboxChanged);
+    if (widget.currentUser != null) {
+      _loadAll();
+    }
   }
 
-  void _onInboxChanged() {
-    if (mounted) setState(() {});
+  @override
+  void didUpdateWidget(covariant FriendsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentUser?.id != widget.currentUser?.id) {
+      if (widget.currentUser != null) {
+        _loadAll();
+      } else {
+        setState(() {
+          _friends = const <FriendSummary>[];
+          _incoming = const <FriendRequestSummary>[];
+          _outgoing = const <FriendRequestSummary>[];
+          _searchResults = const <FriendSearchResult>[];
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
-    AppInbox.tick.removeListener(_onInboxChanged);
+    _searchCtrl.dispose();
     super.dispose();
   }
 
-  Widget build(BuildContext context) {
-    final friends = List<String>.from(AppInbox.friends)
-      ..sort((a, b) {
-        final lastA = AppInbox.getConversation(a).isNotEmpty
-            ? AppInbox.getConversation(a).last
-            : "";
-        final lastB = AppInbox.getConversation(b).isNotEmpty
-            ? AppInbox.getConversation(b).last
-            : "";
-        return lastB.compareTo(lastA);
+  Future<void> _loadAll() async {
+    final user = widget.currentUser;
+    if (user == null) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final friends = await _fetchFriends();
+      final pending = await _fetchPending();
+      if (!mounted) return;
+      setState(() {
+        _friends = friends;
+        _incoming = pending['incoming'] ?? const <FriendRequestSummary>[];
+        _outgoing = pending['outgoing'] ?? const <FriendRequestSummary>[];
       });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = 'Kon vrienden niet laden: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  Future<List<FriendSummary>> _fetchFriends() async {
+    final res = await apiClient.get(
+      Uri.parse('$apiBase/friends'),
+      headers: {'Accept': 'application/json'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception(extractErrorMessage(res));
+    }
+    final decoded = jsonDecode(res.body);
+    if (decoded is List) {
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map(FriendSummary.fromJson)
+          .where((f) => f.user.id.isNotEmpty)
+          .toList();
+    }
+    return const <FriendSummary>[];
+  }
+
+  Future<Map<String, List<FriendRequestSummary>>> _fetchPending() async {
+    final res = await apiClient.get(
+      Uri.parse('$apiBase/friends/requests'),
+      headers: {'Accept': 'application/json'},
+    );
+    if (res.statusCode != 200) {
+      throw Exception(extractErrorMessage(res));
+    }
+    final decoded = jsonDecode(res.body);
+    final incoming =
+        decoded is Map<String, dynamic> && decoded['incoming'] is List
+        ? (decoded['incoming'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(FriendRequestSummary.fromJson)
+              .where((f) => f.friendshipId.isNotEmpty)
+              .toList()
+        : <FriendRequestSummary>[];
+    final outgoing =
+        decoded is Map<String, dynamic> && decoded['outgoing'] is List
+        ? (decoded['outgoing'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map(FriendRequestSummary.fromJson)
+              .where((f) => f.friendshipId.isNotEmpty)
+              .toList()
+        : <FriendRequestSummary>[];
+    return {'incoming': incoming, 'outgoing': outgoing};
+  }
+
+  Future<void> _handleSearch() async {
+    final user = widget.currentUser;
+    if (user == null) {
+      await _promptLogin();
+      return;
+    }
+    final query = _searchCtrl.text.trim();
+    if (query.length < 2) {
+      setState(() => _searchResults = const <FriendSearchResult>[]);
+      return;
+    }
+    setState(() {
+      _searching = true;
+      _error = null;
+    });
+    try {
+      final uri = Uri.parse(
+        '$apiBase/friends/search?q=${Uri.encodeQueryComponent(query)}',
+      );
+      final res = await apiClient.get(
+        uri,
+        headers: {'Accept': 'application/json'},
+      );
+      if (res.statusCode != 200) {
+        throw Exception(extractErrorMessage(res));
+      }
+      final decoded = jsonDecode(res.body);
+      if (!mounted) return;
+      if (decoded is List) {
+        final results = decoded
+            .whereType<Map<String, dynamic>>()
+            .map(FriendSearchResult.fromJson)
+            .where((r) => r.user.id.isNotEmpty && r.user.id != user.id)
+            .toList();
+        setState(() => _searchResults = results);
+      } else {
+        setState(() => _searchResults = const <FriendSearchResult>[]);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = 'Zoeken mislukt: $e');
+    } finally {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  Future<void> _sendFriendRequest(String userId) async {
+    setState(() => _searching = true);
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/friends/requests'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'targetUserId': userId}),
+      );
+      if (res.statusCode != 201 && res.statusCode != 200) {
+        throw Exception(extractErrorMessage(res));
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vriendschapsverzoek verstuurd')),
+      );
+      await _loadAll();
+      await _handleSearch();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Kon verzoek niet versturen: $e')));
+    } finally {
+      if (mounted) setState(() => _searching = false);
+    }
+  }
+
+  Future<void> _respondToRequest(String friendshipId, String action) async {
+    try {
+      final res = await apiClient.patch(
+        Uri.parse('$apiBase/friends/requests/$friendshipId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'action': action}),
+      );
+      if (res.statusCode != 200) {
+        throw Exception(extractErrorMessage(res));
+      }
+      if (!mounted) return;
+      await _loadAll();
+      if (_searchCtrl.text.trim().isNotEmpty) {
+        await _handleSearch();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Kon verzoek niet bijwerken: $e')));
+    }
+  }
+
+  Future<void> _openChat(FriendUserInfo friend) async {
+    final currentUser = widget.currentUser;
+    if (currentUser == null) {
+      await _promptLogin();
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatPage(friend: friend, currentUser: currentUser),
+      ),
+    );
+    if (!mounted) return;
+    await _loadAll();
+  }
+
+  Future<void> _promptLogin() async {
+    if (widget.onLogin != null) {
+      await widget.onLogin!.call();
+      return;
+    }
+    final result = await Navigator.of(
+      context,
+    ).push<AuthSession>(MaterialPageRoute(builder: (_) => const LoginPage()));
+    if (result != null) {
+      final root = context.findAncestorStateOfType<_HapkeAppState>();
+      root?.setSession(result);
+    }
+  }
+
+  Widget _buildSearchAction(FriendSearchResult result) {
+    switch (result.relationship.toUpperCase()) {
+      case 'NONE':
+        return ElevatedButton(
+          onPressed: _searching
+              ? null
+              : () => _sendFriendRequest(result.user.id),
+          child: const Text('Toevoegen'),
+        );
+      case 'FRIEND':
+        return OutlinedButton(
+          onPressed: () => _openChat(result.user),
+          child: const Text('Open chat'),
+        );
+      case 'PENDING_OUTGOING':
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('Verzoek verstuurd'),
+        );
+      case 'PENDING_INCOMING':
+        if (result.friendshipId == null) {
+          return const SizedBox.shrink();
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () =>
+                  _respondToRequest(result.friendshipId!, 'accept'),
+              child: const Text('Accepteer'),
+            ),
+            TextButton(
+              onPressed: () =>
+                  _respondToRequest(result.friendshipId!, 'decline'),
+              child: const Text('Weiger'),
+            ),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildFriendTile(FriendSummary summary) {
+    final initials = summary.user.displayName.isNotEmpty
+        ? summary.user.displayName[0].toUpperCase()
+        : '?';
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(child: Text(initials)),
+        title: Text(summary.user.displayName),
+        subtitle: Text(summary.user.email),
+        trailing: IconButton(
+          icon: const Icon(Icons.chat_outlined),
+          onPressed: () => _openChat(summary.user),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRequestTile(
+    FriendRequestSummary request, {
+    required bool incoming,
+  }) {
+    final other = incoming ? request.requester : request.addressee;
+    final initials = other.displayName.isNotEmpty
+        ? other.displayName[0].toUpperCase()
+        : '?';
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(child: Text(initials)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        other.displayName,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        other.email,
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  incoming ? 'Nieuw verzoek' : 'In afwachting',
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (incoming)
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () =>
+                        _respondToRequest(request.friendshipId, 'accept'),
+                    child: const Text('Accepteer'),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () =>
+                        _respondToRequest(request.friendshipId, 'decline'),
+                    child: const Text('Weiger'),
+                  ),
+                ],
+              )
+            else
+              const Text(
+                'Wacht op reactie',
+                style: TextStyle(color: Colors.black54),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = widget.currentUser;
+    if (currentUser == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Vrienden')),
+        body: Center(
+          child: ElevatedButton.icon(
+            onPressed: _promptLogin,
+            icon: const Icon(Icons.login),
+            label: const Text('Log in om vrienden te beheren'),
+          ),
+        ),
+      );
+    }
+
+    final showSpinner =
+        _loading && _friends.isEmpty && _incoming.isEmpty && _outgoing.isEmpty;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Vrienden')),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(12),
-        itemCount: friends.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (_, i) {
-          final name = friends[i];
-          final last = AppInbox.getConversation(name).isNotEmpty
-              ? AppInbox.getConversation(name).last
-              : 'Nog geen berichten';
-          final unread = AppInbox.getUnread(name);
-          return Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                child: Text(name.substring(0, 1).toUpperCase()),
+      body: RefreshIndicator(
+        onRefresh: _loadAll,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            TextField(
+              controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => _handleSearch(),
+              decoration: InputDecoration(
+                hintText: 'Zoek op naam of e-mail',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _handleSearch,
+                ),
               ),
-              title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(
-                last,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: unread > 0
-                  ? CircleAvatar(
-                      radius: 12,
-                      backgroundColor: Colors.orange,
-                      child: Text(
-                        '$unread',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    )
-                  : null,
-              onTap: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ChatPage(friend: name)),
-                );
-                setState(() {}); // refresh counters
-              },
             ),
-          );
-        },
+            const SizedBox(height: 12),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            if (_searching) const LinearProgressIndicator(),
+            if (!_searching && _searchResults.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Zoekresultaten',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              ..._searchResults.map((result) {
+                final initials = result.user.displayName.isNotEmpty
+                    ? result.user.displayName[0].toUpperCase()
+                    : '?';
+                return Card(
+                  child: ListTile(
+                    leading: CircleAvatar(child: Text(initials)),
+                    title: Text(result.user.displayName),
+                    subtitle: Text(result.user.email),
+                    trailing: _buildSearchAction(result),
+                  ),
+                );
+              }),
+            ] else if (!_searching && _searchCtrl.text.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text('Geen resultaten gevonden'),
+            ],
+            if (showSpinner)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 48),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            if (_incoming.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Binnenkomende verzoeken',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              ..._incoming.map((req) => _buildRequestTile(req, incoming: true)),
+            ],
+            if (_outgoing.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Verzonden verzoeken',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              ..._outgoing.map(
+                (req) => _buildRequestTile(req, incoming: false),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Text(
+              'Je vrienden (${_friends.length})',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            if (_friends.isEmpty)
+              const Text('Nog geen vrienden. Voeg iemand toe via zoeken.'),
+            ..._friends.map(_buildFriendTile),
+            const SizedBox(height: 60),
+          ],
+        ),
       ),
     );
   }
 }
 
 class ChatPage extends StatefulWidget {
-  final String friend;
-  const ChatPage({super.key, required this.friend});
+  final FriendUserInfo friend;
+  final HapkeUser currentUser;
+  const ChatPage({super.key, required this.friend, required this.currentUser});
+
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final _ctrl = TextEditingController();
+  final TextEditingController _ctrl = TextEditingController();
+  final ScrollController _scrollCtrl = ScrollController();
+  ChatThread? _thread;
+  bool _loading = true;
+  bool _sending = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    AppInbox.markRead(widget.friend);
+    _loadThread();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.friend.id != widget.friend.id) {
+      _loadThread();
+    }
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadThread() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final thread = await _fetchThread();
+      if (!mounted) return;
+      setState(() => _thread = thread);
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = 'Kon chat niet laden: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<ChatThread> _fetchThread() async {
+    final res = await apiClient.post(
+      Uri.parse('$apiBase/chats/direct/${widget.friend.id}'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({}),
+    );
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception(extractErrorMessage(res));
+    }
+    final decoded = jsonDecode(res.body);
+    if (decoded is Map<String, dynamic>) {
+      return ChatThread.fromJson(decoded, widget.currentUser.id);
+    }
+    throw Exception('Ongeldig antwoord van server');
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollCtrl.hasClients) return;
+      _scrollCtrl.animateTo(
+        _scrollCtrl.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  Future<void> _sendMessage() async {
+    final thread = _thread;
+    final text = _ctrl.text.trim();
+    if (thread == null || text.isEmpty) return;
+    setState(() => _sending = true);
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/chats/${thread.id}/messages'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'content': text}),
+      );
+      if (res.statusCode != 200 && res.statusCode != 201) {
+        throw Exception(extractErrorMessage(res));
+      }
+      final decoded = jsonDecode(res.body);
+      if (decoded is Map<String, dynamic>) {
+        final message = ChatMessageView.fromJson(
+          decoded,
+          widget.currentUser.id,
+        );
+        if (!mounted) return;
+        setState(() {
+          _thread = ChatThread(
+            id: thread.id,
+            participants: thread.participants,
+            messages: [...thread.messages, message],
+          );
+        });
+        _ctrl.clear();
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Bericht versturen mislukt: $e')));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    if (timestamp.year == now.year &&
+        timestamp.month == now.month &&
+        timestamp.day == now.day) {
+      return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
+    }
+    return '${timestamp.day.toString().padLeft(2, '0')}-${timestamp.month.toString().padLeft(2, '0')} '
+        '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final msgs = AppInbox.getConversation(widget.friend);
+    final thread = _thread;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.friend)),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: msgs.length,
-              itemBuilder: (_, i) => Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(msgs[i]),
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
+      appBar: AppBar(title: Text(widget.friend.displayName)),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _ctrl,
-                      decoration: const InputDecoration(
-                        hintText: 'Schrijf een bericht...',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
+                  Text(_error!, textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      final t = _ctrl.text.trim();
-                      if (t.isEmpty) return;
-                      AppInbox.sendToFriend(widget.friend, t);
-                      _ctrl.clear();
-                      setState(() {});
-                    },
-                    icon: const Icon(Icons.send),
-                    label: const Text('Stuur'),
+                    onPressed: _loadThread,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Opnieuw proberen'),
                   ),
                 ],
               ),
+            )
+          : thread == null
+          ? const Center(child: Text('Geen chat gevonden'))
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollCtrl,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: thread.messages.length,
+                    itemBuilder: (_, i) {
+                      final message = thread.messages[i];
+                      final alignment = message.isMine
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft;
+                      final bubbleColor = message.isMine
+                          ? const Color(0xFF0A2342)
+                          : Colors.grey.shade200;
+                      final textColor = message.isMine
+                          ? Colors.white
+                          : Colors.black87;
+                      return Align(
+                        alignment: alignment,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          decoration: BoxDecoration(
+                            color: bubbleColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: message.isMine
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              if (!message.isMine)
+                                Text(
+                                  message.sender.displayName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: textColor.withOpacity(0.7),
+                                  ),
+                                ),
+                              Text(
+                                message.content,
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              SizedBox(height: message.isMine ? 2 : 4),
+                              Text(
+                                _formatTimestamp(message.createdAt),
+                                style: TextStyle(
+                                  color: textColor.withOpacity(0.6),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _ctrl,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => _sendMessage(),
+                            minLines: 1,
+                            maxLines: 4,
+                            decoration: const InputDecoration(
+                              hintText: 'Schrijf een bericht...',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: _sending ? null : () => _sendMessage(),
+                          child: _sending
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.send),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
