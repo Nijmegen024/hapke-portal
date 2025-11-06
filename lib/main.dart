@@ -4495,8 +4495,10 @@ class _VerifyAccountPageState extends State<VerifyAccountPage> {
       if (res.statusCode == 200) {
         final msg =
             (data?['message'] ?? 'Je account is geactiveerd!').toString();
-        final already =
-            data?['alreadyVerified'] is bool ? data?['alreadyVerified'] : false;
+        final bool alreadyVerified =
+            (data != null && data['alreadyVerified'] is bool)
+                ? (data['alreadyVerified'] as bool)
+                : false;
         setState(() {
           _loading = false;
           _success = true;
