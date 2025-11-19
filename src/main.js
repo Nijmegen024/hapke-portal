@@ -4,8 +4,10 @@ import ReactDOM from 'react-dom/client';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Nav from './components/Nav';
 import Login from './pages/Login';
+import MenuPage from './pages/Menu';
 import Orders from './pages/Orders';
 import Register from './pages/Register';
+import Settings from './pages/Settings';
 const router = createBrowserRouter([
     {
         path: '/',
@@ -13,6 +15,8 @@ const router = createBrowserRouter([
         children: [
             { index: true, element: _jsx(Orders, {}) },
             { path: 'orders', element: _jsx(Orders, {}) },
+            { path: 'menu', element: _jsx(MenuPage, {}) },
+            { path: 'settings', element: _jsx(Settings, {}) },
             { path: 'login', element: _jsx(Login, {}) },
             { path: 'register', element: _jsx(Register, {}) },
         ],

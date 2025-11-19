@@ -1,10 +1,11 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_API_BASE;
 const SESSION_KEY = 'vendor_session';
 const TOKEN_KEY = 'vendor_token';
 export default function Login() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
@@ -41,7 +42,7 @@ export default function Login() {
                 localStorage.setItem(TOKEN_KEY, data.token);
             }
             localStorage.setItem(SESSION_KEY, '1');
-            window.location.href = '/orders';
+            navigate('/orders');
         }
         catch (err) {
             setError(err?.message || 'Er ging iets mis');
