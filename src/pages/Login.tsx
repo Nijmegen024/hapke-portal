@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const API_BASE = import.meta.env.VITE_API_BASE as string
 const SESSION_KEY = 'vendor_session'
 const TOKEN_KEY = 'vendor_token'
 
 export default function Login() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -46,7 +47,7 @@ export default function Login() {
         localStorage.setItem(TOKEN_KEY, data.token as string)
       }
       localStorage.setItem(SESSION_KEY, '1')
-      window.location.href = '/orders'
+      navigate('/orders')
     } catch (err: any) {
       setError(err?.message || 'Er ging iets mis')
     } finally {
