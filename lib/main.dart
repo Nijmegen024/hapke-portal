@@ -6,9 +6,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_config.dart';
+
 void main() => runApp(const HapkeApp());
 
-const String apiBase = 'https://hapke-backend.onrender.com';
+const String apiBase = AppConfig.apiBaseUrl;
 const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 const String _sessionStorageKey = 'hapke_session';
 const String _lastOrderStorageKey = 'hapke_last_order';

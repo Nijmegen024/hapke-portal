@@ -1,3 +1,3 @@
 class AppConfig {
-  static const apiBaseUrl = 'http://localhost:3000';
+  static const apiBaseUrl = 'https://hapke-backend.onrender.com';
 }
