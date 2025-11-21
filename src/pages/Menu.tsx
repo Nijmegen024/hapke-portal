@@ -864,23 +864,25 @@ const textInputStyle: React.CSSProperties = {
 
 const categoryButtonStyle = (active: boolean): React.CSSProperties => ({
   border: '1px solid',
-  borderColor: active ? '#111827' : '#e2e8f0',
+  borderColor: active ? '#14B8A6' : '#e2e8f0',
   borderRadius: 10,
   padding: '10px 12px',
   textAlign: 'left',
   cursor: 'pointer',
-  background: active ? '#111827' : '#fff',
-  color: active ? '#fff' : '#111827',
+  background: active ? '#14B8A6' : '#fff',
+  color: active ? '#fff' : '#0f172a',
+  boxShadow: active ? '0 2px 0 #FFC857' : 'none',
 })
 
 const primaryButtonStyle = (isLoading: boolean): React.CSSProperties => ({
   padding: '10px 16px',
   borderRadius: 8,
   border: 'none',
-  background: '#111827',
+  background: '#14B8A6',
   color: '#fff',
   fontWeight: 600,
   cursor: isLoading ? 'wait' : 'pointer',
+  boxShadow: '0 2px 0 #FFC857',
 })
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -888,7 +890,7 @@ const secondaryButtonStyle: React.CSSProperties = {
   borderRadius: 8,
   border: '1px solid #cbd5f5',
   background: '#fff',
-  color: '#111827',
+  color: '#14B8A6',
   cursor: 'pointer',
 }
 

@@ -122,7 +122,7 @@ export default function Orders() {
     const isActive=currentStatus===targetStatus
     return {
       backgroundColor:isActive?'#16a34a':'#d1d5db',
-      color:isActive?'#fff':'#111827',
+      color:isActive?'#fff':'#14B8A6',
       border:'none',
       borderRadius:6,
       padding:'6px 12px',

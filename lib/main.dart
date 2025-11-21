@@ -152,6 +152,50 @@ class MenuItem {
   });
 }
 
+List<MenuItem> _parseMenuItemsFromApi(dynamic rawMenu) {
+  if (rawMenu is! List) {
+    return const <MenuItem>[];
+  }
+  final parsed = <MenuItem>[];
+  for (final entry in rawMenu) {
+    if (entry is! Map<String, dynamic>) continue;
+    final id = (entry['id'] ?? entry['itemId'] ?? '').toString().trim();
+    final name = (entry['name'] ?? '').toString().trim();
+    if (id.isEmpty || name.isEmpty) continue;
+    final description = (entry['description'] ?? '').toString().trim();
+    final priceCents = _readPriceCents(entry);
+    parsed.add(
+      MenuItem(
+        id: id,
+        name: name,
+        description: description,
+        priceCents: priceCents,
+      ),
+    );
+  }
+  return parsed;
+}
+
+int _readPriceCents(Map<String, dynamic> json) {
+  final rawCents = json['priceCents'];
+  if (rawCents is num) {
+    final cents = rawCents.round();
+    return cents >= 0 ? cents : 0;
+  }
+  final rawPrice = json['price'];
+  double? euros;
+  if (rawPrice is num) {
+    euros = rawPrice.toDouble();
+  } else if (rawPrice != null) {
+    euros = double.tryParse(rawPrice.toString());
+  }
+  if (euros == null) {
+    return 0;
+  }
+  final cents = (euros * 100).round();
+  return cents >= 0 ? cents : 0;
+}
+
 class CartItem {
   final Restaurant restaurant;
   final MenuItem item;
@@ -1216,6 +1260,8 @@ class _HapkeAppState extends State<HapkeApp> {
         ? 'https://images.unsplash.com/photo-1541542684-4abf21a55761?auto=format&fit=crop&w=1200&q=80'
         : imageUrlRaw;
 
+    final menuItems = _parseMenuItemsFromApi(json['menu']);
+
     return Restaurant(
       id: rawId,
       name: rawName,
@@ -1223,7 +1269,7 @@ class _HapkeAppState extends State<HapkeApp> {
       category: category.isEmpty ? 'Nieuw' : category,
       rating: rating,
       eta: eta.isEmpty ? '35–45 min' : eta,
-      menu: const [],
+      menu: menuItems,
       imageUrl: imageUrl,
       minOrder: minOrder > 0 ? minOrder : 20.0,
       deliveryFee: deliveryFee,
@@ -1318,28 +1364,28 @@ class _HapkeAppState extends State<HapkeApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0A2342),
+          seedColor: const Color(0xFF14B8A6),
           brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
-          backgroundColor: Color(0xFF0A2342),
+          backgroundColor: Color(0xFF14B8A6),
           foregroundColor: Colors.white,
           systemOverlayStyle: SystemUiOverlayStyle.light,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(40, 40),
-            backgroundColor: const Color(0xFFE53935), // Hapke Red
+            backgroundColor: const Color(0xFF14B8A6),
             foregroundColor: Colors.white,
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFE53935),
-            side: const BorderSide(color: Color(0xFFE53935)),
+            foregroundColor: const Color(0xFF14B8A6),
+            side: const BorderSide(color: Color(0xFF14B8A6)),
           ),
         ),
         cardTheme: CardThemeData(
@@ -1350,15 +1396,15 @@ class _HapkeAppState extends State<HapkeApp> {
           ),
         ),
         chipTheme: ChipThemeData(
-          backgroundColor: const Color(0xFF0A2342),
-          selectedColor: const Color(0xFF0A2342),
+          backgroundColor: const Color(0xFF14B8A6),
+          selectedColor: const Color(0xFF14B8A6),
           labelStyle: const TextStyle(color: Colors.white),
-          secondarySelectedColor: const Color(0xFF0A2342),
+          secondarySelectedColor: const Color(0xFF14B8A6),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF0A2342),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
+          backgroundColor: Color(0xFF14B8A6),
+          selectedItemColor: Color(0xFFFFC857),
+          unselectedItemColor: Colors.white,
           selectedLabelStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -1631,9 +1677,9 @@ class _RootTabsState extends State<_RootTabs> {
       body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF0A2342),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
+        backgroundColor: const Color(0xFF14B8A6),
+        selectedItemColor: const Color(0xFFFFC857),
+        unselectedItemColor: Colors.white,
         selectedFontSize: 12,
         unselectedFontSize: 12,
         currentIndex: _index,
@@ -1680,9 +1726,9 @@ class _AccountTab extends StatefulWidget {
 }
 
 class _AccountTabState extends State<_AccountTab> {
-  static const Color primaryColor = Color(0xFF0A2342);
+  static const Color primaryColor = Color(0xFF14B8A6);
   static const Color backgroundColor = Color(0xFFF4F7FB);
-  static const Color accentColor = Color(0xFFD64045);
+  static const Color accentColor = Color(0xFFFFC857);
 
   bool _locationServicesEnabled = true;
   bool _preciseLocationEnabled = true;
@@ -2767,7 +2813,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6),
         clipBehavior: Clip.none,
         title: Transform.scale(
           scale: 1.15,
@@ -2804,7 +2850,7 @@ class _HomePageState extends State<HomePage> {
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: const Color(0xFF0A2342),
+              backgroundColor: const Color(0xFF14B8A6),
               iconTheme: const IconThemeData(color: Colors.white),
               titleTextStyle: const TextStyle(
                 color: Colors.white,
@@ -3111,6 +3157,31 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  List<MenuItem> _menu = const [];
+  bool _loadingMenu = false;
+  String? _menuError;
+
+  @override
+  void initState() {
+    super.initState();
+    _menu = List<MenuItem>.from(widget.restaurant.menu);
+    if (_menu.isEmpty) {
+      _fetchMenu();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant RestaurantDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.restaurant.id != widget.restaurant.id) {
+      _menu = List<MenuItem>.from(widget.restaurant.menu);
+      if (_menu.isEmpty) {
+        _fetchMenu();
+      } else {
+        setState(() {});
+      }
+    }
+  }
   Future<void> _openCart() async {
     await widget.openCartModal(context);
     if (mounted) setState(() {});
@@ -3134,6 +3205,46 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchMenu() async {
+    if (_loadingMenu) return;
+    setState(() {
+      _loadingMenu = true;
+      _menuError = null;
+    });
+    try {
+      final res = await apiClient.get(
+        Uri.parse('$apiBase/restaurants/${widget.restaurant.id}/menu'),
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final parsed = _parseMenuItemsFromApi(data);
+        if (mounted) {
+          setState(() {
+            _menu = parsed;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _menuError = 'Menu laden mislukt (${res.statusCode})';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _menuError = 'Menu laden mislukt. Probeer opnieuw.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingMenu = false;
+        });
+      }
+    }
   }
 
   @override
@@ -3162,6 +3273,17 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         title: Text(widget.restaurant.name),
         actions: [
           IconButton(
+            onPressed: _loadingMenu ? null : _fetchMenu,
+            icon: _loadingMenu
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh),
+            tooltip: 'Menu vernieuwen',
+          ),
+          IconButton(
             onPressed: () async => _openCart(),
             icon: Stack(
               clipBehavior: Clip.none,
@@ -3187,7 +3309,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ),
       body: ListView.separated(
         padding: EdgeInsets.fromLTRB(12, 12, 12, bottomPadding),
-        itemCount: widget.restaurant.menu.length + 1,
+        itemCount: _menu.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (_, i) {
           if (i == 0) {
@@ -3307,7 +3429,32 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     ),
                   ),
                 ],
-                if (widget.restaurant.menu.isEmpty) ...[
+                if (_menuError != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF4F4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _menuError!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _loadingMenu ? null : _fetchMenu,
+                          child: const Text('Opnieuw'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else if (_menu.isEmpty && !_loadingMenu) ...[
                   const SizedBox(height: 16),
                   Container(
                     width: double.infinity,
@@ -3321,13 +3468,23 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       style: TextStyle(color: Colors.black87),
                     ),
                   ),
+                ] else if (_loadingMenu && _menu.isEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Center(child: CircularProgressIndicator()),
                 ],
               ],
             );
           }
-          final m = widget.restaurant.menu[i - 1];
+          final menuItems = _menu;
+          if (_loadingMenu && menuItems.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final m = menuItems[i - 1];
           return Card(
-            color: const Color(0xFF0A2342),
+            color: const Color(0xFF14B8A6),
             child: ListTile(
               dense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -5086,8 +5243,8 @@ class _CategoryChip extends StatelessWidget {
         ),
         selected: selected,
         showCheckmark: false,
-        backgroundColor: const Color(0xFF0A2342), // navy blue
-        selectedColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6), // teal
+        selectedColor: const Color(0xFF14B8A6),
         side: BorderSide(color: selected ? Colors.white : Colors.white24),
         onSelected: (_) => onSelected(),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -5145,7 +5302,7 @@ class StickyCartBar extends StatelessWidget {
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A2342),
+            color: const Color(0xFF14B8A6),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Colors.white12),
             boxShadow: const [
@@ -5464,7 +5621,7 @@ class _VideosTabState extends State<VideosTab> {
     final restaurants = widget.restaurants;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6),
         clipBehavior: Clip.none,
         title: Transform.scale(
           scale: 1.15,
@@ -6492,7 +6649,7 @@ class _ChatPageState extends State<ChatPage> {
                           ? Alignment.centerRight
                           : Alignment.centerLeft;
                       final bubbleColor = message.isMine
-                          ? const Color(0xFF0A2342)
+                          ? const Color(0xFF14B8A6)
                           : Colors.grey.shade200;
                       final textColor = message.isMine
                           ? Colors.white
