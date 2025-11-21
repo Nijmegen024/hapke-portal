@@ -152,6 +152,50 @@ class MenuItem {
   });
 }
 
+List<MenuItem> _parseMenuItemsFromApi(dynamic rawMenu) {
+  if (rawMenu is! List) {
+    return const <MenuItem>[];
+  }
+  final parsed = <MenuItem>[];
+  for (final entry in rawMenu) {
+    if (entry is! Map<String, dynamic>) continue;
+    final id = (entry['id'] ?? entry['itemId'] ?? '').toString().trim();
+    final name = (entry['name'] ?? '').toString().trim();
+    if (id.isEmpty || name.isEmpty) continue;
+    final description = (entry['description'] ?? '').toString().trim();
+    final priceCents = _readPriceCents(entry);
+    parsed.add(
+      MenuItem(
+        id: id,
+        name: name,
+        description: description,
+        priceCents: priceCents,
+      ),
+    );
+  }
+  return parsed;
+}
+
+int _readPriceCents(Map<String, dynamic> json) {
+  final rawCents = json['priceCents'];
+  if (rawCents is num) {
+    final cents = rawCents.round();
+    return cents >= 0 ? cents : 0;
+  }
+  final rawPrice = json['price'];
+  double? euros;
+  if (rawPrice is num) {
+    euros = rawPrice.toDouble();
+  } else if (rawPrice != null) {
+    euros = double.tryParse(rawPrice.toString());
+  }
+  if (euros == null) {
+    return 0;
+  }
+  final cents = (euros * 100).round();
+  return cents >= 0 ? cents : 0;
+}
+
 class CartItem {
   final Restaurant restaurant;
   final MenuItem item;
@@ -1216,6 +1260,8 @@ class _HapkeAppState extends State<HapkeApp> {
         ? 'https://images.unsplash.com/photo-1541542684-4abf21a55761?auto=format&fit=crop&w=1200&q=80'
         : imageUrlRaw;
 
+    final menuItems = _parseMenuItemsFromApi(json['menu']);
+
     return Restaurant(
       id: rawId,
       name: rawName,
@@ -1223,7 +1269,7 @@ class _HapkeAppState extends State<HapkeApp> {
       category: category.isEmpty ? 'Nieuw' : category,
       rating: rating,
       eta: eta.isEmpty ? '35–45 min' : eta,
-      menu: const [],
+      menu: menuItems,
       imageUrl: imageUrl,
       minOrder: minOrder > 0 ? minOrder : 20.0,
       deliveryFee: deliveryFee,
@@ -3111,6 +3157,31 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  List<MenuItem> _menu = const [];
+  bool _loadingMenu = false;
+  String? _menuError;
+
+  @override
+  void initState() {
+    super.initState();
+    _menu = List<MenuItem>.from(widget.restaurant.menu);
+    if (_menu.isEmpty) {
+      _fetchMenu();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant RestaurantDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.restaurant.id != widget.restaurant.id) {
+      _menu = List<MenuItem>.from(widget.restaurant.menu);
+      if (_menu.isEmpty) {
+        _fetchMenu();
+      } else {
+        setState(() {});
+      }
+    }
+  }
   Future<void> _openCart() async {
     await widget.openCartModal(context);
     if (mounted) setState(() {});
@@ -3134,6 +3205,46 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchMenu() async {
+    if (_loadingMenu) return;
+    setState(() {
+      _loadingMenu = true;
+      _menuError = null;
+    });
+    try {
+      final res = await apiClient.get(
+        Uri.parse('$apiBase/restaurants/${widget.restaurant.id}/menu'),
+      );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final parsed = _parseMenuItemsFromApi(data);
+        if (mounted) {
+          setState(() {
+            _menu = parsed;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _menuError = 'Menu laden mislukt (${res.statusCode})';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _menuError = 'Menu laden mislukt. Probeer opnieuw.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingMenu = false;
+        });
+      }
+    }
   }
 
   @override
@@ -3162,6 +3273,17 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         title: Text(widget.restaurant.name),
         actions: [
           IconButton(
+            onPressed: _loadingMenu ? null : _fetchMenu,
+            icon: _loadingMenu
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh),
+            tooltip: 'Menu vernieuwen',
+          ),
+          IconButton(
             onPressed: () async => _openCart(),
             icon: Stack(
               clipBehavior: Clip.none,
@@ -3187,7 +3309,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ),
       body: ListView.separated(
         padding: EdgeInsets.fromLTRB(12, 12, 12, bottomPadding),
-        itemCount: widget.restaurant.menu.length + 1,
+        itemCount: _menu.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (_, i) {
           if (i == 0) {
@@ -3307,7 +3429,32 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     ),
                   ),
                 ],
-                if (widget.restaurant.menu.isEmpty) ...[
+                if (_menuError != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF4F4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _menuError!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _loadingMenu ? null : _fetchMenu,
+                          child: const Text('Opnieuw'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else if (_menu.isEmpty && !_loadingMenu) ...[
                   const SizedBox(height: 16),
                   Container(
                     width: double.infinity,
@@ -3321,11 +3468,21 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       style: TextStyle(color: Colors.black87),
                     ),
                   ),
+                ] else if (_loadingMenu && _menu.isEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Center(child: CircularProgressIndicator()),
                 ],
               ],
             );
           }
-          final m = widget.restaurant.menu[i - 1];
+          final menuItems = _menu;
+          if (_loadingMenu && menuItems.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final m = menuItems[i - 1];
           return Card(
             color: const Color(0xFF0A2342),
             child: ListTile(
