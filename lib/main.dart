@@ -1364,28 +1364,28 @@ class _HapkeAppState extends State<HapkeApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0A2342),
+          seedColor: const Color(0xFF14B8A6),
           brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
-          backgroundColor: Color(0xFF0A2342),
+          backgroundColor: Color(0xFF14B8A6),
           foregroundColor: Colors.white,
           systemOverlayStyle: SystemUiOverlayStyle.light,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(40, 40),
-            backgroundColor: const Color(0xFFE53935), // Hapke Red
+            backgroundColor: const Color(0xFF14B8A6),
             foregroundColor: Colors.white,
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFE53935),
-            side: const BorderSide(color: Color(0xFFE53935)),
+            foregroundColor: const Color(0xFF14B8A6),
+            side: const BorderSide(color: Color(0xFF14B8A6)),
           ),
         ),
         cardTheme: CardThemeData(
@@ -1396,15 +1396,15 @@ class _HapkeAppState extends State<HapkeApp> {
           ),
         ),
         chipTheme: ChipThemeData(
-          backgroundColor: const Color(0xFF0A2342),
-          selectedColor: const Color(0xFF0A2342),
+          backgroundColor: const Color(0xFF14B8A6),
+          selectedColor: const Color(0xFF14B8A6),
           labelStyle: const TextStyle(color: Colors.white),
-          secondarySelectedColor: const Color(0xFF0A2342),
+          secondarySelectedColor: const Color(0xFF14B8A6),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF0A2342),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
+          backgroundColor: Color(0xFF14B8A6),
+          selectedItemColor: Color(0xFFFFC857),
+          unselectedItemColor: Colors.white,
           selectedLabelStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -1677,9 +1677,9 @@ class _RootTabsState extends State<_RootTabs> {
       body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF0A2342),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
+        backgroundColor: const Color(0xFF14B8A6),
+        selectedItemColor: const Color(0xFFFFC857),
+        unselectedItemColor: Colors.white,
         selectedFontSize: 12,
         unselectedFontSize: 12,
         currentIndex: _index,
@@ -1726,9 +1726,9 @@ class _AccountTab extends StatefulWidget {
 }
 
 class _AccountTabState extends State<_AccountTab> {
-  static const Color primaryColor = Color(0xFF0A2342);
+  static const Color primaryColor = Color(0xFF14B8A6);
   static const Color backgroundColor = Color(0xFFF4F7FB);
-  static const Color accentColor = Color(0xFFD64045);
+  static const Color accentColor = Color(0xFFFFC857);
 
   bool _locationServicesEnabled = true;
   bool _preciseLocationEnabled = true;
@@ -2813,7 +2813,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6),
         clipBehavior: Clip.none,
         title: Transform.scale(
           scale: 1.15,
@@ -2850,7 +2850,7 @@ class _HomePageState extends State<HomePage> {
             SliverAppBar(
               floating: true,
               snap: true,
-              backgroundColor: const Color(0xFF0A2342),
+              backgroundColor: const Color(0xFF14B8A6),
               iconTheme: const IconThemeData(color: Colors.white),
               titleTextStyle: const TextStyle(
                 color: Colors.white,
@@ -3484,7 +3484,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           }
           final m = menuItems[i - 1];
           return Card(
-            color: const Color(0xFF0A2342),
+            color: const Color(0xFF14B8A6),
             child: ListTile(
               dense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -5243,8 +5243,8 @@ class _CategoryChip extends StatelessWidget {
         ),
         selected: selected,
         showCheckmark: false,
-        backgroundColor: const Color(0xFF0A2342), // navy blue
-        selectedColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6), // teal
+        selectedColor: const Color(0xFF14B8A6),
         side: BorderSide(color: selected ? Colors.white : Colors.white24),
         onSelected: (_) => onSelected(),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -5302,7 +5302,7 @@ class StickyCartBar extends StatelessWidget {
           margin: const EdgeInsets.all(12),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A2342),
+            color: const Color(0xFF14B8A6),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Colors.white12),
             boxShadow: const [
@@ -5621,7 +5621,7 @@ class _VideosTabState extends State<VideosTab> {
     final restaurants = widget.restaurants;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A2342),
+        backgroundColor: const Color(0xFF14B8A6),
         clipBehavior: Clip.none,
         title: Transform.scale(
           scale: 1.15,
@@ -6649,7 +6649,7 @@ class _ChatPageState extends State<ChatPage> {
                           ? Alignment.centerRight
                           : Alignment.centerLeft;
                       final bubbleColor = message.isMine
-                          ? const Color(0xFF0A2342)
+                          ? const Color(0xFF14B8A6)
                           : Colors.grey.shade200;
                       final textColor = message.isMine
                           ? Colors.white
