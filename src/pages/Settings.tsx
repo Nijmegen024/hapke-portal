@@ -247,10 +247,11 @@ export default function Settings() {
                 padding: '10px 18px',
                 borderRadius: 8,
                 border: 'none',
-                background: '#111827',
+                background: '#14B8A6',
                 color: '#fff',
                 fontWeight: 600,
                 cursor: saving ? 'wait' : 'pointer',
+                boxShadow: '0 2px 0 #FFC857',
               }}
             >
               {saving ? 'Opslaan…' : 'Opslaan'}

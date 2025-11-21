@@ -95,10 +95,11 @@ export default function Nav() {
       padding: '6px 10px',
       borderRadius: 8,
       fontWeight: 600,
-      color: active ? '#111827' : '#475569',
-      backgroundColor: active ? '#e2e8f0' : 'transparent',
+      color: active ? '#14B8A6' : '#475569',
+      backgroundColor: active ? '#e0f7f4' : 'transparent',
       border: '1px solid',
-      borderColor: active ? '#111827' : 'transparent',
+      borderColor: active ? '#14B8A6' : 'transparent',
+      boxShadow: active ? '0 2px 0 #FFC857' : 'none',
     }
   }
 }

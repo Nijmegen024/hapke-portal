@@ -86,7 +86,7 @@ export default function Login() {
         <button
           disabled={loading}
           type="submit"
-          style={{ width: '100%', padding: 10, borderRadius: 8, border: 'none', background: '#111827', color: '#fff', fontWeight: 600 }}
+          style={{ width: '100%', padding: 10, borderRadius: 8, border: 'none', background: '#14B8A6', color: '#fff', fontWeight: 600, boxShadow: '0 2px 0 #FFC857' }}
         >
           {loading ? 'Inloggen…' : 'Inloggen'}
         </button>

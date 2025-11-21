@@ -222,11 +222,12 @@ export default function Register() {
             padding: 12,
             border: 'none',
             borderRadius: 8,
-            background: '#111827',
+            background: '#14B8A6',
             color: '#fff',
             fontSize: 16,
             fontWeight: 600,
             cursor: loading ? 'wait' : 'pointer',
+            boxShadow: '0 2px 0 #FFC857',
           }}
         >
           {loading ? 'Versturen…' : 'Account aanmaken'}
