@@ -4829,6 +4829,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _loading = false;
   String? _error;
   bool _isLogin = true;
+  bool _resendBusy = false;
+  String? _resendMessage;
 
   @override
   void dispose() {
@@ -4848,6 +4850,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = true;
       _error = null;
+      _resendMessage = null;
     });
 
     final session = _isLogin
@@ -4897,6 +4900,42 @@ class _LoginPageState extends State<LoginPage> {
       _error = 'Inloggen mislukt: $e';
     }
     return null;
+  }
+
+  Future<void> _resendVerification() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty || _resendBusy) return;
+    setState(() {
+      _resendBusy = true;
+      _resendMessage = null;
+    });
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/auth/resend-verification'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (res.statusCode == 200) {
+        setState(() {
+          _resendMessage = 'Verificatiemail is opnieuw verstuurd.';
+        });
+      } else {
+        final data = _parseJson(res.body);
+        final msg =
+            (data?['message'] ?? 'Opnieuw versturen mislukt').toString();
+        setState(() {
+          _resendMessage = msg;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _resendMessage = 'Opnieuw versturen mislukt: $e';
+      });
+    } finally {
+      setState(() {
+        _resendBusy = false;
+      });
+    }
   }
 
   Future<AuthSession?> _registerAndLogin(String email, String password) async {
@@ -4970,6 +5009,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final errorText = (_error ?? '').toLowerCase();
+    final shouldShowResend = errorText.contains('activeer') ||
+        errorText.contains('verifieer') ||
+        errorText.contains('geactiveerd') ||
+        !_isLogin;
+
     return Scaffold(
       appBar: AppBar(title: Text(_isLogin ? 'Inloggen' : 'Account aanmaken')),
       body: Form(
@@ -5067,6 +5112,33 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
+            if (shouldShowResend)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _resendBusy ? null : _resendVerification,
+                      child: _resendBusy
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Stuur verificatiemail opnieuw'),
+                    ),
+                    if (_resendMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          _resendMessage!,
+                          style: const TextStyle(color: Colors.teal),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ElevatedButton(
               onPressed: _loading ? null : _submit,
