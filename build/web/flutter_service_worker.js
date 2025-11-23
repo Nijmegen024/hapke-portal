@@ -3,11 +3,11 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "d93edd0a73b4bfa6b7cd1c1f953ecfc1",
+const RESOURCES = {"flutter_bootstrap.js": "25a8dd5e6eb56803cb01201a01f1a05d",
 "version.json": "62693fad600d06931c8e161590cc458c",
 "index.html": "c0667c8b19f47321b04ee2f174f347bb",
 "/": "c0667c8b19f47321b04ee2f174f347bb",
-"main.dart.js": "36b2110997cf45d35c37554e2e15b9b3",
+"main.dart.js": "2eb195431cb42cee0ca0bcd1f3632a1e",
 "flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
@@ -23,7 +23,7 @@ const RESOURCES = {"flutter_bootstrap.js": "d93edd0a73b4bfa6b7cd1c1f953ecfc1",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "assets/AssetManifest.bin": "f7f7afd118c62fd6f0953c148942f2c9",
 "assets/fonts/MaterialIcons-Regular.otf": "d6cebe60502f4a5640dcb695be262026",
-"assets/assets/icons/hapke_logo.png": "9ede52055d75c1d28a44fd319b396722",
+"assets/assets/icons/hapke_logo.png": "1b4a0efa77ff5f89f370f31ba995e94b",
 "canvaskit/skwasm.js": "ea559890a088fe28b4ddf70e17e60052",
 "canvaskit/skwasm.js.symbols": "e72c79950c8a8483d826a7f0560573a1",
 "canvaskit/canvaskit.js.symbols": "bdcd3835edf8586b6d6edfce8749fb77",
