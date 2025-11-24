@@ -3618,11 +3618,13 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   String? _error;
   String? authToken;
   Timer? _pollTimer;
+  static const String _pendingPaymentKey = 'hapke_pending_payment';
 
   @override
   void initState() {
     super.initState();
     authToken = widget.authToken;
+    _restorePendingPayment();
   }
 
   List<Map<String, dynamic>> get _itemPayload => widget.items
@@ -3646,6 +3648,30 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   void _stopPolling() {
     _pollTimer?.cancel();
     _pollTimer = null;
+  }
+
+  Future<void> _savePendingPayment(String paymentId) async {
+    if (paymentId.isEmpty) return;
+    try {
+      await _secureStorage.write(key: _pendingPaymentKey, value: paymentId);
+    } catch (_) {}
+  }
+
+  Future<void> _clearPendingPayment() async {
+    try {
+      await _secureStorage.delete(key: _pendingPaymentKey);
+    } catch (_) {}
+  }
+
+  Future<void> _restorePendingPayment() async {
+    try {
+      final pending = await _secureStorage.read(key: _pendingPaymentKey);
+      if (!mounted) return;
+      if (pending != null && pending.isNotEmpty) {
+        setState(() => _paymentId = pending);
+        _startPolling();
+      }
+    } catch (_) {}
   }
 
   Future<void> _startPayment(PaymentOption option) async {
@@ -3695,6 +3721,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
 
       if (statusLower == 'paid' && paymentId.isNotEmpty) {
         _stopPolling();
+        await _clearPendingPayment();
         orderResponse = await _completeOrder(paymentId);
       } else {
         if (mounted) {
@@ -3705,6 +3732,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           });
         }
         if (paymentId.isNotEmpty) {
+          await _savePendingPayment(paymentId);
           _startPolling();
         }
         if (checkoutUrl != null) {
@@ -3758,11 +3786,13 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       final normalized = status.toLowerCase();
       if (normalized == 'paid') {
         _stopPolling();
+        await _clearPendingPayment();
         orderResponse = await _completeOrder(paymentId);
       } else if (normalized == 'failed' ||
           normalized == 'expired' ||
           normalized == 'canceled') {
         _stopPolling();
+        await _clearPendingPayment();
         if (mounted) {
           setState(() {
             _status = status;
@@ -3826,6 +3856,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
         return null;
       }
       if (res.statusCode == 200 || res.statusCode == 201) {
+        await _clearPendingPayment();
         return jsonDecode(res.body) as Map<String, dynamic>;
       }
       if (mounted) {
@@ -4902,42 +4933,6 @@ class _LoginPageState extends State<LoginPage> {
     return null;
   }
 
-  Future<void> _resendVerification() async {
-    final email = _emailCtrl.text.trim();
-    if (email.isEmpty || _resendBusy) return;
-    setState(() {
-      _resendBusy = true;
-      _resendMessage = null;
-    });
-    try {
-      final res = await apiClient.post(
-        Uri.parse('$apiBase/auth/resend-verification'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}),
-      );
-      if (res.statusCode == 200) {
-        setState(() {
-          _resendMessage = 'Verificatiemail is opnieuw verstuurd.';
-        });
-      } else {
-        final data = _parseJson(res.body);
-        final msg =
-            (data?['message'] ?? 'Opnieuw versturen mislukt').toString();
-        setState(() {
-          _resendMessage = msg;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _resendMessage = 'Opnieuw versturen mislukt: $e';
-      });
-    } finally {
-      setState(() {
-        _resendBusy = false;
-      });
-    }
-  }
-
   Future<AuthSession?> _registerAndLogin(String email, String password) async {
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({'email': email, 'password': password});
@@ -4969,6 +4964,41 @@ class _LoginPageState extends State<LoginPage> {
       _error = 'Registreren mislukt: $e';
     }
     return null;
+  }
+
+  Future<void> _resendVerification() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty || _resendBusy) return;
+    setState(() {
+      _resendBusy = true;
+      _resendMessage = null;
+    });
+    try {
+      final res = await apiClient.post(
+        Uri.parse('$apiBase/auth/resend-verification'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (res.statusCode == 200) {
+        setState(() {
+          _resendMessage = 'Verificatiemail is opnieuw verstuurd.';
+        });
+      } else {
+        final data = _parseJson(res.body);
+        final msg = (data?['message'] ?? 'Opnieuw versturen mislukt').toString();
+        setState(() {
+          _resendMessage = msg;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _resendMessage = 'Opnieuw versturen mislukt: $e';
+      });
+    } finally {
+      setState(() {
+        _resendBusy = false;
+      });
+    }
   }
 
   AuthSession _parseAuthResponse(String body) {
@@ -5009,12 +5039,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final errorText = (_error ?? '').toLowerCase();
-    final shouldShowResend = errorText.contains('activeer') ||
-        errorText.contains('verifieer') ||
-        errorText.contains('geactiveerd') ||
-        !_isLogin;
-
     return Scaffold(
       appBar: AppBar(title: Text(_isLogin ? 'Inloggen' : 'Account aanmaken')),
       body: Form(
@@ -5113,7 +5137,8 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(_error!, style: const TextStyle(color: Colors.red)),
               ),
-            if (shouldShowResend)
+            if (_error?.toLowerCase().contains('activeer') == true ||
+                _error?.toLowerCase().contains('verifieer') == true)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Column(
