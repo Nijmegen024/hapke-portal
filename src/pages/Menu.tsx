@@ -18,6 +18,7 @@ type MenuItem = {
   description: string
   price: number
   available: boolean
+  imageUrl?: string | null
 }
 
 type MenuCategory = {
@@ -32,6 +33,7 @@ type ItemFormState = {
   description: string
   price: string
   available: boolean
+  imageUrl: string
 }
 
 const blankItemForm = (): ItemFormState => ({
@@ -40,6 +42,7 @@ const blankItemForm = (): ItemFormState => ({
   description: '',
   price: '',
   available: true,
+  imageUrl: '',
 })
 
 const currencyFormatter = new Intl.NumberFormat('nl-NL', {
@@ -328,15 +331,27 @@ export default function MenuPage() {
                     {selectedCategory.items.map((item) => (
                       <div key={item.id} style={itemCardStyle}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                          <div>
+                          <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 600 }}>{item.name}</div>
                             {item.description && (
                               <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
                                 {item.description}
                               </div>
                             )}
+                            {item.imageUrl && (
+                              <div style={{ marginTop: 8 }}>
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.name}
+                                  style={{ maxWidth: 160, borderRadius: 10, border: '1px solid #e2e8f0' }}
+                                  onError={(ev) => {
+                                    (ev.currentTarget as HTMLImageElement).style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                            )}
                           </div>
-                          <div style={{ fontWeight: 600 }}>{currencyFormatter.format(item.price ?? 0)}</div>
+                          <div style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{currencyFormatter.format(item.price ?? 0)}</div>
                         </div>
                         <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
@@ -376,26 +391,40 @@ export default function MenuPage() {
                 )}
               </div>
 
-              <div
-                style={{
-                  padding: 20,
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 12,
-                  background: '#f8fafc',
-                }}
+            <div
+              style={{
+                padding: 20,
+                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                background: '#f8fafc',
+              }}
+            >
+              <h3 style={{ marginTop: 0 }}>
+                {itemForm.id ? 'Gerecht bewerken' : 'Nieuw gerecht'}
+              </h3>
+              <form
+                onSubmit={handleItemSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
               >
-                <h3 style={{ marginTop: 0 }}>
-                  {itemForm.id ? 'Gerecht bewerken' : 'Nieuw gerecht'}
-                </h3>
-                <form
-                  onSubmit={handleItemSubmit}
-                  style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-                >
-                  <label style={{ fontSize: 13, fontWeight: 600 }}>
-                    Naam
-                    <input
-                      required
-                      style={textInputStyle}
+                <label style={{ fontSize: 13, fontWeight: 600 }}>
+                  Afbeeldings-URL (optioneel)
+                  <input
+                    style={textInputStyle}
+                    value={itemForm.imageUrl}
+                    onChange={(e) =>
+                      setItemForm((prev) => ({ ...prev, imageUrl: e.target.value }))
+                    }
+                    placeholder="https://…/foto.jpg"
+                  />
+                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
+                    Gebruik een directe link naar een afbeelding. Uploaden in de portal wordt nog niet ondersteund.
+                  </div>
+                </label>
+                <label style={{ fontSize: 13, fontWeight: 600 }}>
+                  Naam
+                  <input
+                    required
+                    style={textInputStyle}
                       value={itemForm.name}
                       onChange={(e) =>
                         setItemForm((prev) => ({ ...prev, name: e.target.value }))
@@ -504,6 +533,7 @@ export default function MenuPage() {
       description: raw.description ?? '',
       price: parsedPrice,
       available: raw.available !== false,
+      imageUrl: raw.imageUrl ?? null,
     }
   }
 
@@ -658,13 +688,14 @@ export default function MenuPage() {
       setActionError('Voer een geldige prijs in')
       return
     }
-    const payload = {
-      categoryId: selectedCategory.id,
-      name,
-      description: itemForm.description.trim(),
-      price: Number(parsedPrice.toFixed(2)),
-      available: itemForm.available,
-    }
+  const payload = {
+    categoryId: selectedCategory.id,
+    name,
+    description: itemForm.description.trim(),
+    price: Number(parsedPrice.toFixed(2)),
+    available: itemForm.available,
+    imageUrl: itemForm.imageUrl.trim() || null,
+  }
     setSavingItem(true)
     setActionError(null)
     try {
@@ -760,6 +791,7 @@ export default function MenuPage() {
       description: item.description,
       price: item.price.toFixed(2),
       available: item.available,
+      imageUrl: item.imageUrl ?? '',
     })
   }
 
@@ -777,6 +809,7 @@ export default function MenuPage() {
           description: item.description,
           price: item.price,
           available: !item.available,
+          imageUrl: item.imageUrl ?? null,
         }),
       })
       if (res.status === 401) {
