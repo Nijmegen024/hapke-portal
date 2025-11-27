@@ -36,7 +36,7 @@ pre_install do |_installer|
   packages = [
     {
       name: "flutter_secure_storage",
-      version: "9.2.4",
+      version: "9.1.0",
       relative_path: ["ios", "Classes"],
       file: "FlutterSecureStoragePlugin.h",
       content: "#import <flutter_secure_storage/flutter_secure_storage-Swift.h>\n",
