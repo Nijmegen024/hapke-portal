@@ -3,6 +3,8 @@
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+# Force a writable pub cache inside the repo (Xcode Cloud cannot write to /.pub-cache)
+ENV['PUB_CACHE'] ||= File.join(Dir.pwd, '.pub-cache')
 
 require 'fileutils'
 
