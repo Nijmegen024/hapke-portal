@@ -3,6 +3,15 @@ set -euo pipefail
 
 # Ensure Flutter packages and pods are in sync after clone
 export PUB_CACHE="$PWD/.pub-cache"
+mkdir -p "$PUB_CACHE"
+# Try to point /.pub-cache to our writable cache (ignore failures)
+if [ ! -e "/.pub-cache" ]; then
+  ln -s "$PUB_CACHE" "/.pub-cache" 2>/dev/null || true
+else
+  rm -rf "/.pub-cache" 2>/dev/null || true
+  ln -s "$PUB_CACHE" "/.pub-cache" 2>/dev/null || true
+fi
+
 flutter pub get
 # Ensure required files exist in the local pub cache
 mkdir -p "$PUB_CACHE/hosted/pub.dev/flutter_secure_storage-9.2.4/ios/Classes"
