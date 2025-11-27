@@ -29,6 +29,34 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+pre_install do |_installer|
+  cache_paths = [ENV['PUB_CACHE'] || File.expand_path("~/.pub-cache")]
+  packages = [
+    {
+      name: "flutter_secure_storage",
+      version: "9.2.4",
+      relative_path: ["ios", "Classes"],
+      file: "FlutterSecureStoragePlugin.h",
+      content: "#import <flutter_secure_storage/flutter_secure_storage-Swift.h>\n",
+    },
+    {
+      name: "url_launcher_ios",
+      version: "6.3.4",
+      relative_path: ["ios", "url_launcher_ios", "Sources", "url_launcher_ios", "Resources"],
+      file: "PrivacyInfo.xcprivacy",
+      content: "{}\n",
+    },
+  ]
+
+  cache_paths.each do |cache|
+    packages.each do |pkg|
+      path = File.join(cache, "hosted", "pub.dev", "#{pkg[:name]}-#{pkg[:version]}", *pkg[:relative_path])
+      FileUtils.mkdir_p(path)
+      File.write(File.join(path, pkg[:file]), pkg[:content])
+    end
+  end
+end
+
 target 'Runner' do
   use_frameworks!
 
