@@ -5,14 +5,16 @@ set -euo pipefail
 export PUB_CACHE="$PWD/.pub-cache"
 mkdir -p "$PUB_CACHE"
 # Try to point /.pub-cache to our writable cache (ignore failures)
-if [ ! -e "/.pub-cache" ]; then
-  ln -s "$PUB_CACHE" "/.pub-cache" 2>/dev/null || true
-else
-  rm -rf "/.pub-cache" 2>/dev/null || true
-  ln -s "$PUB_CACHE" "/.pub-cache" 2>/dev/null || true
-fi
+rm -rf "/.pub-cache" 2>/dev/null || true
+ln -s "$PUB_CACHE" "/.pub-cache" 2>/dev/null || true
 
+# Regenerate plugins file with local cache
+rm -f .flutter-plugins .flutter-plugins-dependencies
 flutter pub get
+# Rewrite plugin paths if they still point to /.pub-cache
+if [ -f .flutter-plugins-dependencies ]; then
+  sed -i '' "s#/\.pub-cache#$PUB_CACHE#g" .flutter-plugins-dependencies || true
+fi
 # Ensure required files exist in the local pub cache
 mkdir -p "$PUB_CACHE/hosted/pub.dev/flutter_secure_storage-9.2.4/ios/Classes"
 cat > "$PUB_CACHE/hosted/pub.dev/flutter_secure_storage-9.2.4/ios/Classes/FlutterSecureStoragePlugin.h" <<'EOF'
