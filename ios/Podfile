@@ -3,8 +3,6 @@
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
-# Force a writable pub cache inside the repo (Xcode Cloud cannot write to /.pub-cache)
-ENV['PUB_CACHE'] ||= File.join(Dir.pwd, '.pub-cache')
 
 require 'fileutils'
 
@@ -32,30 +30,16 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 pre_install do |_installer|
-  cache_paths = [ENV['PUB_CACHE'] || File.expand_path("~/.pub-cache")]
-  packages = [
-    {
-      name: "flutter_secure_storage",
-      version: "9.1.0",
-      relative_path: ["ios", "Classes"],
-      file: "FlutterSecureStoragePlugin.h",
-      content: "#import <flutter_secure_storage/flutter_secure_storage-Swift.h>\n",
-    },
-    {
-      name: "url_launcher_ios",
-      version: "6.3.4",
-      relative_path: ["ios", "url_launcher_ios", "Sources", "url_launcher_ios", "Resources"],
-      file: "PrivacyInfo.xcprivacy",
-      content: "{}\n",
-    },
-  ]
-
-  cache_paths.each do |cache|
-    packages.each do |pkg|
-      path = File.join(cache, "hosted", "pub.dev", "#{pkg[:name]}-#{pkg[:version]}", *pkg[:relative_path])
-      FileUtils.mkdir_p(path)
-      File.write(File.join(path, pkg[:file]), pkg[:content])
-    end
+  plugins_dir = File.expand_path(File.join(__dir__, '.symlinks', 'plugins'))
+  FileUtils.mkdir_p(plugins_dir)
+  {
+    'flutter_secure_storage' => File.expand_path(File.join(__dir__, 'Plugins', 'flutter_secure_storage')),
+    'url_launcher_ios' => File.expand_path(File.join(__dir__, 'Plugins', 'url_launcher_ios')),
+  }.each do |name, source|
+    target = File.join(plugins_dir, name)
+    next unless File.directory?(source)
+    FileUtils.rm_rf(target)
+    FileUtils.ln_sf(source, target)
   end
 end
 
