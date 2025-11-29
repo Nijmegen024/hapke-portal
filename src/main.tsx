@@ -7,6 +7,9 @@ import MenuPage from './pages/Menu'
 import Orders from './pages/Orders'
 import Register from './pages/Register'
 import Settings from './pages/Settings'
+import AdminLoginPage from './admin/AdminLoginPage'
+import AdminRestaurantsPage from './admin/AdminRestaurantsPage'
+import AdminOrdersPage from './admin/AdminOrdersPage'
 
 const router = createBrowserRouter([
   {
@@ -21,6 +24,9 @@ const router = createBrowserRouter([
       { path: 'register', element: <Register /> },
     ],
   },
+  { path: '/admin/login', element: <AdminLoginPage /> },
+  { path: '/admin/restaurants', element: <AdminRestaurantsPage /> },
+  { path: '/admin/orders', element: <AdminOrdersPage /> },
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
