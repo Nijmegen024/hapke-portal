@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SupabaseImageUpload } from '../components/SupabaseImageUpload'
 
 const API_BASE = import.meta.env.VITE_API_BASE as string
 const SESSION_KEY = 'vendor_session'
@@ -417,7 +418,15 @@ export default function MenuPage() {
                     placeholder="https://…/foto.jpg"
                   />
                   <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
-                    Gebruik een directe link naar een afbeelding. Uploaden in de portal wordt nog niet ondersteund.
+                    Upload een foto of plak een directe link naar een afbeelding.
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <SupabaseImageUpload
+                      ownerId={selectedCategoryId ?? 'general'}
+                      onUploaded={(url) =>
+                        setItemForm((prev) => ({ ...prev, imageUrl: url }))
+                      }
+                    />
                   </div>
                 </label>
                 <label style={{ fontSize: 13, fontWeight: 600 }}>
