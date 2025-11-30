@@ -23,35 +23,47 @@ export const SupabaseImageUpload: React.FC<SupabaseImageUploadProps> = ({
     setUploading(true);
 
     try {
-      const bucket = import.meta.env.VITE_SUPABASE_BUCKET as string;
-      if (!bucket) {
-        throw new Error("VITE_SUPABASE_BUCKET is niet gezet");
-      }
-      // Force consistent bucket casing
-      const bucketName = "Restaurant-media";
-
-      const ext = file.name.split(".").pop();
-      const filePath = `${ownerId}/${Date.now()}.${ext ?? "jpg"}`;
-
-      const { data, error } = await supabase
-        .storage
-        .from(bucketName)
-        .upload(filePath, file, { upsert: true });
-
-      if (error) {
-        console.error('Supabase upload error', error);
-        alert(`Upload error: ${error.message}`);
-        setUploading(false);
-        return;
+      const token = localStorage.getItem('vendor_token');
+      const apiBase = import.meta.env.VITE_API_BASE as string;
+      if (!apiBase) {
+        throw new Error('API base ontbreekt');
       }
 
-      const { data: publicUrlData } = supabase
-        .storage
-        .from(bucketName)
-        .getPublicUrl(filePath);
+      // Vraag signed upload URL aan bij backend
+      const signRes = await fetch(`${apiBase}/media/sign-upload`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ fileName: file.name }),
+      });
 
-      console.log('Public URL from Supabase:', publicUrlData);
-      const publicUrl = publicUrlData.publicUrl;
+      if (!signRes.ok) {
+        const text = await signRes.text();
+        throw new Error(text || 'Kon upload-URL niet ophalen');
+      }
+
+      const signData = await signRes.json();
+      const uploadUrl = signData.uploadUrl as string;
+      const publicUrl = signData.publicUrl as string;
+
+      if (!uploadUrl || !publicUrl) {
+        throw new Error('Ongeldige upload respons');
+      }
+
+      // Upload het bestand naar de signed URL
+      const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        body: file,
+      });
+
+      if (!uploadRes.ok) {
+        const text = await uploadRes.text();
+        throw new Error(text || 'Upload mislukt');
+      }
+
       onUploaded(publicUrl);
     } catch (err) {
       console.error(err);
