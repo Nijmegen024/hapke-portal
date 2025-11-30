@@ -31,23 +31,27 @@ export const SupabaseImageUpload: React.FC<SupabaseImageUploadProps> = ({
       const bucketName = "Restaurant-media";
 
       const ext = file.name.split(".").pop();
-      const fileName = `${ownerId}/${Date.now()}.${ext ?? "jpg"}`;
+      const filePath = `${ownerId}/${Date.now()}.${ext ?? "jpg"}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { data, error } = await supabase
+        .storage
         .from(bucketName)
-        .upload(fileName, file, {
-          upsert: true,
-        });
+        .upload(filePath, file, { upsert: true });
 
-      if (uploadError || !data) {
-        throw uploadError ?? new Error("Onbekende upload fout");
+      if (error) {
+        console.error('Supabase upload error', error);
+        alert(`Upload error: ${error.message}`);
+        setUploading(false);
+        return;
       }
 
-      const { data: publicData } = supabase.storage
+      const { data: publicUrlData } = supabase
+        .storage
         .from(bucketName)
-        .getPublicUrl(data.path);
+        .getPublicUrl(filePath);
 
-      const publicUrl = publicData.publicUrl;
+      console.log('Public URL from Supabase:', publicUrlData);
+      const publicUrl = publicUrlData.publicUrl;
       onUploaded(publicUrl);
     } catch (err) {
       console.error(err);
