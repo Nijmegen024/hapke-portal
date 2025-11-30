@@ -27,12 +27,14 @@ export const SupabaseImageUpload: React.FC<SupabaseImageUploadProps> = ({
       if (!bucket) {
         throw new Error("VITE_SUPABASE_BUCKET is niet gezet");
       }
+      // Force consistent bucket casing
+      const bucketName = "Restaurant-media";
 
       const ext = file.name.split(".").pop();
       const fileName = `${ownerId}/${Date.now()}.${ext ?? "jpg"}`;
 
       const { data, error: uploadError } = await supabase.storage
-        .from(bucket)
+        .from(bucketName)
         .upload(fileName, file, {
           upsert: true,
         });
@@ -42,7 +44,7 @@ export const SupabaseImageUpload: React.FC<SupabaseImageUploadProps> = ({
       }
 
       const { data: publicData } = supabase.storage
-        .from(bucket)
+        .from(bucketName)
         .getPublicUrl(data.path);
 
       const publicUrl = publicData.publicUrl;
