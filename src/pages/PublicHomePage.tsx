@@ -7,7 +7,7 @@ const brand = {
   accent: '#FFC857',
   text: '#0f172a',
   muted: '#475569',
-  soft: '#f1f5f9',
+  soft: '#ecfeff',
 }
 
 const PageSection: React.FC<{ title: string; children: React.ReactNode }> = ({
@@ -30,7 +30,12 @@ const bulletStyle: React.CSSProperties = {
 
 export default function PublicHomePage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: `linear-gradient(180deg, ${brand.soft}, #f8fafc)`
+      }}
+    >
       <header
         style={{
           display: 'flex',
@@ -38,7 +43,7 @@ export default function PublicHomePage() {
           justifyContent: 'space-between',
           padding: '18px 24px',
           background: '#ffffff',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
           position: 'sticky',
           top: 0,
           zIndex: 10,
@@ -54,10 +59,10 @@ export default function PublicHomePage() {
             style={{
               padding: '10px 14px',
               borderRadius: 10,
-              border: `1px solid ${brand.primary}`,
-              color: brand.primary,
-              fontWeight: 600,
-              background: '#fff',
+            border: `1px solid ${brand.primary}`,
+            color: brand.primary,
+            fontWeight: 600,
+            background: '#fff',
             }}
           >
             Inloggen
@@ -68,12 +73,12 @@ export default function PublicHomePage() {
               padding: '10px 14px',
               borderRadius: 10,
               border: 'none',
-              background: brand.primary,
-              color: '#ffffff',
-              fontWeight: 700,
-              boxShadow: `0 8px 24px ${brand.primary}40`,
-            }}
-          >
+            background: brand.primary,
+            color: '#ffffff',
+            fontWeight: 700,
+            boxShadow: `0 8px 24px ${brand.primary}40`,
+          }}
+        >
             Restaurant aanmelden
           </Link>
         </div>
@@ -142,9 +147,9 @@ export default function PublicHomePage() {
           >
             <strong style={{ display: 'block', marginBottom: 8 }}>Waarom Hapke?</strong>
             <ul style={{ paddingLeft: 18, margin: 0, color: brand.muted }}>
-              <li>Lagere commissie dan Thuisbezorgd</li>
-              <li>Video’s van gerechten voor meer bestellingen</li>
-              <li>Eigen bezorgers of Hapke-bezorgers mogelijk</li>
+              <li>Lagere commissie dan grote platforms</li>
+              <li>Video’s van gerechten zorgen voor meer bestellingen</li>
+              <li>Eigen bezorgers of bezorging via Hapke</li>
               <li>Alles in één portal en app</li>
             </ul>
           </div>
