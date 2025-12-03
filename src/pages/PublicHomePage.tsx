@@ -1,21 +1,30 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import logo from '../../assets/icons/hapke_logo.png'
+
+const brand = {
+  primary: '#14B8A6',
+  accent: '#FFC857',
+  text: '#0f172a',
+  muted: '#475569',
+  soft: '#f1f5f9',
+}
 
 const PageSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
   <section style={{ maxWidth: 960, margin: '0 auto', padding: '32px 20px' }}>
-    <h2 style={{ marginBottom: 12, color: '#0f172a' }}>{title}</h2>
-    <div style={{ color: '#475569', fontSize: 16, lineHeight: 1.6 }}>{children}</div>
+    <h2 style={{ marginBottom: 12, color: brand.text }}>{title}</h2>
+    <div style={{ color: brand.muted, fontSize: 16, lineHeight: 1.6 }}>{children}</div>
   </section>
 )
 
 const bulletStyle: React.CSSProperties = {
   padding: '10px 12px',
   borderRadius: 10,
-  background: '#e2f5ff',
-  color: '#0f172a',
+  background: '#d1f6f1',
+  color: brand.text,
   marginBottom: 8,
 }
 
@@ -36,21 +45,8 @@ export default function PublicHomePage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: '#0ea5e9',
-              display: 'grid',
-              placeItems: 'center',
-              color: '#fff',
-              fontWeight: 700,
-            }}
-          >
-            H
-          </div>
-          <strong style={{ fontSize: 18, color: '#0f172a' }}>Hapke</strong>
+          <img src={logo} alt="Hapke" style={{ height: 36, width: 36, borderRadius: 8 }} />
+          <strong style={{ fontSize: 18, color: brand.text }}>Hapke</strong>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <Link
@@ -58,9 +54,10 @@ export default function PublicHomePage() {
             style={{
               padding: '10px 14px',
               borderRadius: 10,
-              border: '1px solid #0ea5e9',
-              color: '#0ea5e9',
+              border: `1px solid ${brand.primary}`,
+              color: brand.primary,
               fontWeight: 600,
+              background: '#fff',
             }}
           >
             Inloggen
@@ -71,13 +68,13 @@ export default function PublicHomePage() {
               padding: '10px 14px',
               borderRadius: 10,
               border: 'none',
-              background: '#0ea5e9',
+              background: brand.primary,
               color: '#ffffff',
               fontWeight: 700,
-              boxShadow: '0 8px 24px rgba(14,165,233,0.25)',
+              boxShadow: `0 8px 24px ${brand.primary}40`,
             }}
           >
-            Voor restaurants
+            Restaurant aanmelden
           </Link>
         </div>
       </header>
@@ -95,13 +92,13 @@ export default function PublicHomePage() {
           }}
         >
           <div>
-            <p style={{ color: '#0ea5e9', fontWeight: 700, marginBottom: 8 }}>
+            <p style={{ color: brand.primary, fontWeight: 700, marginBottom: 8 }}>
               Voor restaurants
             </p>
-            <h1 style={{ fontSize: 36, margin: '0 0 12px', color: '#0f172a' }}>
+            <h1 style={{ fontSize: 36, margin: '0 0 12px', color: brand.text }}>
               Bereik meer klanten met Hapke
             </h1>
-            <p style={{ color: '#475569', fontSize: 16, lineHeight: 1.6, marginBottom: 16 }}>
+            <p style={{ color: brand.muted, fontSize: 16, lineHeight: 1.6, marginBottom: 16 }}>
               Combineer video en bezorgen in één platform speciaal voor restaurants.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -110,10 +107,10 @@ export default function PublicHomePage() {
                 style={{
                   padding: '12px 16px',
                   borderRadius: 10,
-                  background: '#0ea5e9',
+                  background: brand.primary,
                   color: '#fff',
                   fontWeight: 700,
-                  boxShadow: '0 10px 30px rgba(14,165,233,0.25)',
+                  boxShadow: `0 10px 30px ${brand.primary}40`,
                 }}
               >
                 Maak een gratis account
@@ -124,7 +121,7 @@ export default function PublicHomePage() {
                   padding: '12px 16px',
                   borderRadius: 10,
                   border: '1px solid #e2e8f0',
-                  color: '#0f172a',
+                  color: brand.text,
                   fontWeight: 600,
                   background: '#fff',
                 }}
@@ -139,12 +136,12 @@ export default function PublicHomePage() {
               borderRadius: 16,
               padding: 20,
               boxShadow: '0 12px 36px rgba(0,0,0,0.08)',
-              color: '#0f172a',
+              color: brand.text,
               lineHeight: 1.6,
             }}
           >
             <strong style={{ display: 'block', marginBottom: 8 }}>Waarom Hapke?</strong>
-            <ul style={{ paddingLeft: 18, margin: 0, color: '#475569' }}>
+            <ul style={{ paddingLeft: 18, margin: 0, color: brand.muted }}>
               <li>Lagere commissie dan Thuisbezorgd</li>
               <li>Video’s van gerechten voor meer bestellingen</li>
               <li>Eigen bezorgers of Hapke-bezorgers mogelijk</li>
