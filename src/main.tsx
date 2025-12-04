@@ -9,6 +9,17 @@ import Register from './pages/Register'
 import Settings from './pages/Settings'
 import PublicHomePage from './pages/PublicHomePage'
 
+// Remove any old service workers (from the previous Flutter build) so the portal
+// always serves the latest React assets.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .getRegistrations()
+    .then((regs) => regs.forEach((reg) => reg.unregister()))
+    .catch(() => {
+      // ignore cleanup errors
+    })
+}
+
 const hasVendorToken = () =>
   typeof window !== 'undefined' && !!localStorage.getItem('vendor_token')
 
