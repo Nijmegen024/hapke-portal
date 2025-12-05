@@ -8,6 +8,7 @@ import Orders from './pages/Orders'
 import Register from './pages/Register'
 import Settings from './pages/Settings'
 import PublicHomePage from './pages/PublicHomePage'
+import Account from './pages/Account'
 
 // Remove any old service workers (from the previous Flutter build) so the portal
 // always serves the latest React assets.
@@ -46,6 +47,7 @@ function ProtectedLayout() {
 
 const router = createBrowserRouter([
   { path: '/', element: <RootRoute /> },
+  { path: '/index.html', element: <PublicHomePage /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
   {
@@ -54,8 +56,10 @@ const router = createBrowserRouter([
       { path: '/orders', element: <Orders /> },
       { path: '/menu', element: <MenuPage /> },
       { path: '/settings', element: <Settings /> },
+      { path: '/account', element: <Account /> },
     ],
   },
+  { path: '*', element: <PublicHomePage /> },
 ])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

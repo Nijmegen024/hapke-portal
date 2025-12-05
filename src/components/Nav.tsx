@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { to: '/orders', label: 'Dashboard' },
   { to: '/menu', label: 'Menu' },
   { to: '/settings', label: 'Instellingen' },
+  { to: '/account', label: 'Account' },
 ]
 
 export default function Nav() {
@@ -34,7 +35,7 @@ export default function Nav() {
       localStorage.removeItem(SESSION_KEY)
       localStorage.removeItem(TOKEN_KEY)
       setPending(false)
-      window.location.href = '/login'
+      window.location.href = '/'
     }
   }
 
