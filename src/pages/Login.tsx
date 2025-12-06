@@ -11,7 +11,6 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [demoEmail, setDemoEmail] = useState<string | null>(null)
   const demoOptions = [
     { label: 'Pizzeria Napoli', email: 'pizzeria@hapke.nl' },
     { label: 'Sushi Nijmeegs', email: 'sushi@hapke.nl' },
@@ -25,17 +24,9 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const endpoint =
-        demoEmail && demoEmail.length > 0
-          ? `${API_BASE}/vendor/login/demo`
-          : `${API_BASE}/vendor/login`
+      const body = { email: email.trim(), password: password.trim() }
 
-      const body =
-        demoEmail && demoEmail.length > 0
-          ? { email: demoEmail }
-          : { email: email.trim(), password: password.trim() }
-
-      const res = await fetch(endpoint, {
+      const res = await fetch(`${API_BASE}/vendor/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,18 +91,15 @@ export default function Login() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
           <span style={{ fontSize: 14, color: '#475569' }}>Kies demo:</span>
           <select
-            onChange={(e) => {
-              const opt = demoOptions.find((o) => o.email === e.target.value)
-              if (opt) {
-                setEmail(opt.email)
-                setPassword('hapke123')
-                setDemoEmail(opt.email)
-              } else {
-                setDemoEmail(null)
-              }
-            }}
-            defaultValue=""
-          >
+          onChange={(e) => {
+            const opt = demoOptions.find((o) => o.email === e.target.value)
+            if (opt) {
+              setEmail(opt.email)
+              setPassword('hapke123')
+            }
+          }}
+          defaultValue=""
+        >
             <option value="" disabled>
               Selecteer
             </option>
