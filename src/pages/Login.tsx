@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [demoEmail, setDemoEmail] = useState<string | null>(null)
   const demoOptions = [
     { label: 'Pizzeria Napoli', email: 'pizzeria@hapke.nl' },
     { label: 'Sushi Nijmeegs', email: 'sushi@hapke.nl' },
@@ -24,17 +25,24 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const res = await fetch(`${API_BASE}/vendor/login`, {
+      const endpoint =
+        demoEmail && demoEmail.length > 0
+          ? `${API_BASE}/vendor/login/demo`
+          : `${API_BASE}/vendor/login`
+
+      const body =
+        demoEmail && demoEmail.length > 0
+          ? { email: demoEmail }
+          : { email: email.trim(), password: password.trim() }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-        }),
+        body: JSON.stringify(body),
       })
 
       if (res.status === 401) {
@@ -96,6 +104,9 @@ export default function Login() {
               if (opt) {
                 setEmail(opt.email)
                 setPassword('hapke123')
+                setDemoEmail(opt.email)
+              } else {
+                setDemoEmail(null)
               }
             }}
             defaultValue=""
