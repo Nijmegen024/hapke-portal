@@ -11,6 +11,11 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const demoOptions = [
+    { label: 'Pizzeria Napoli', email: 'pizzeria@hapke.nl' },
+    { label: 'Sushi Nijmeegs', email: 'sushi@hapke.nl' },
+    { label: 'Demo Hapke', email: 'demo@hapke.nl' },
+  ]
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -83,6 +88,28 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           style={inputStyle}
         />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontSize: 14, color: '#475569' }}>Kies demo:</span>
+          <select
+            onChange={(e) => {
+              const opt = demoOptions.find((o) => o.email === e.target.value)
+              if (opt) {
+                setEmail(opt.email)
+                setPassword('hapke123')
+              }
+            }}
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Selecteer
+            </option>
+            {demoOptions.map((opt) => (
+              <option key={opt.email} value={opt.email}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           disabled={loading}
           type="submit"
