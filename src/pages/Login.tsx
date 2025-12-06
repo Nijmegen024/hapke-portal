@@ -56,8 +56,9 @@ export default function Login() {
       }
 
       const data = await res.json()
-      if (data?.token) {
-        localStorage.setItem(TOKEN_KEY, data.token as string)
+      const token = data?.accessToken || data?.token
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token as string)
       }
       localStorage.setItem(SESSION_KEY, '1')
       navigate('/orders')
