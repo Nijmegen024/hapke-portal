@@ -1,5 +1,6 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SupabaseImageUpload } from '../components/SupabaseImageUpload'
 
 const API_BASE = import.meta.env.VITE_API_BASE as string
 const SESSION_KEY = 'vendor_session'
@@ -12,18 +13,21 @@ type RestaurantResponse = {
   minimumOrderValue?: number | null
   minOrderAmount?: number | null
   minOrderValue?: number | null
+  heroImageUrl?: string | null
 }
 
 type FormState = {
   name: string
   description: string
   minOrderAmount: string
+  heroImageUrl: string
 }
 
 const EMPTY_FORM: FormState = {
   name: '',
   description: '',
   minOrderAmount: '',
+  heroImageUrl: '',
 }
 
 export default function Settings() {
@@ -64,6 +68,7 @@ export default function Settings() {
         name: data.name ?? '',
         description: data.description ?? '',
         minOrderAmount: resolveMinimumOrderAmount(data),
+        heroImageUrl: data.heroImageUrl ?? '',
       })
     } catch (err: any) {
       setError(err?.message || 'Kon restaurantgegevens niet laden')
@@ -126,6 +131,7 @@ export default function Settings() {
         name: form.name.trim(),
         description: form.description.trim(),
         minimumOrderAmount: Number(parsedValue.toFixed(2)),
+        heroImageUrl: form.heroImageUrl.trim() || null,
       }
       const res = await fetch(`${API_BASE}/vendor/restaurant`, {
         method: 'PUT',
@@ -145,6 +151,7 @@ export default function Settings() {
         name: data.name ?? payload.name,
         description: data.description ?? payload.description,
         minOrderAmount: resolveMinimumOrderAmount(data),
+        heroImageUrl: data.heroImageUrl ?? payload.heroImageUrl ?? '',
       })
       setSuccess('Gegevens opgeslagen')
     } catch (err: any) {
@@ -221,6 +228,56 @@ export default function Settings() {
               placeholder="25.00"
             />
           </label>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              marginTop: 16,
+              padding: 12,
+              border: '1px solid #e5e7eb',
+              borderRadius: 10,
+              background: '#f8fafc',
+            }}
+          >
+            <div style={{ fontWeight: 600 }}>Restaurantfoto</div>
+            <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
+              Upload een foto die in de app bij je restaurant getoond wordt.
+            </p>
+            <SupabaseImageUpload
+              ownerId={form.name || 'restaurant'}
+              onUploaded={(url) =>
+                setForm((prev) => ({ ...prev, heroImageUrl: url }))
+              }
+            />
+            <label style={{ display: 'block', fontWeight: 600 }}>
+              Of plak een afbeelding-URL
+              <input
+                style={inputStyle}
+                value={form.heroImageUrl}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, heroImageUrl: e.target.value }))
+                }
+                placeholder="https://..."
+              />
+            </label>
+            {form.heroImageUrl && (
+              <div
+                style={{
+                  marginTop: 8,
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <img
+                  src={form.heroImageUrl}
+                  alt="Voorbeeld restaurant"
+                  style={{ width: '100%', display: 'block', maxHeight: 240, objectFit: 'cover' }}
+                />
+              </div>
+            )}
+          </div>
 
           {error && (
             <div style={{ color: '#b91c1c', marginTop: 12 }}>{error}</div>
