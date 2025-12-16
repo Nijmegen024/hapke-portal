@@ -7,6 +7,7 @@ const TOKEN_KEY = 'vendor_token'
 const NAV_LINKS = [
   { to: '/orders', label: 'Dashboard' },
   { to: '/menu', label: 'Menu' },
+  { to: '/videos', label: 'Video’s' },
   { to: '/settings', label: 'Instellingen' },
   { to: '/account', label: 'Account' },
 ]

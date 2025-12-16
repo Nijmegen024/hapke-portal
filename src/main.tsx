@@ -9,6 +9,7 @@ import Register from './pages/Register'
 import Settings from './pages/Settings'
 import PublicHomePage from './pages/PublicHomePage'
 import Account from './pages/Account'
+import VideosPage from './pages/Videos'
 
 // Remove any old service workers (from the previous Flutter build) so the portal
 // always serves the latest React assets.
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/orders', element: <Orders /> },
       { path: '/menu', element: <MenuPage /> },
+      { path: '/videos', element: <VideosPage /> },
       { path: '/settings', element: <Settings /> },
       { path: '/account', element: <Account /> },
     ],
