@@ -1,186 +1,150 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import './PublicHomePage.css'
 import logo from '../../assets/icons/hapke_logo.png'
 
-const brand = {
-  primary: '#14B8A6',
-  accent: '#FFC857',
-  text: '#0f172a',
-  muted: '#475569',
-  soft: '#ecfeff',
-}
+const proofCards = [
+  { title: 'Tot 30% meer bestellingen door video', icon: '📈' },
+  { title: '12% commissie (geen verborgen kosten)', icon: '💶' },
+  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '🛵' },
+  { title: 'Alles in één app en portal', icon: '📲' },
+]
 
-const PageSection: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
-  <section style={{ maxWidth: 960, margin: '0 auto', padding: '32px 20px' }}>
-    <h2 style={{ marginBottom: 12, color: brand.text }}>{title}</h2>
-    <div style={{ color: brand.muted, fontSize: 16, lineHeight: 1.6 }}>{children}</div>
-  </section>
-)
-
-const bulletStyle: React.CSSProperties = {
-  padding: '10px 12px',
-  borderRadius: 10,
-  background: '#d1f6f1',
-  color: brand.text,
-  marginBottom: 8,
-}
+const steps = [
+  { title: 'Restaurant aanmelden', icon: '✅' },
+  { title: 'Menu & video’s uploaden', icon: '🎥' },
+  { title: 'Bestellingen ontvangen', icon: '⚡️' },
+]
 
 export default function PublicHomePage() {
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: `linear-gradient(180deg, ${brand.soft}, #f8fafc)`
-      }}
-    >
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '18px 24px',
-          background: '#ffffff',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src={logo} alt="Hapke" style={{ height: 36, width: 36, borderRadius: 8 }} />
-          <strong style={{ fontSize: 18, color: brand.text }}>Hapke</strong>
+    <div className="ph-page">
+      <header className="ph-header">
+        <div className="ph-brand">
+          <img src={logo} alt="Hapke" />
+          <strong>Hapke</strong>
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link
-            to="/login"
-            style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-            border: `1px solid ${brand.primary}`,
-            color: brand.primary,
-            fontWeight: 600,
-            background: '#fff',
-            }}
-          >
+        <div className="ph-nav-actions">
+          <Link to="/login" className="ph-btn ghost">
             Inloggen
           </Link>
-          <Link
-            to="/register"
-            style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: 'none',
-            background: brand.primary,
-            color: '#ffffff',
-            fontWeight: 700,
-            boxShadow: `0 8px 24px ${brand.primary}40`,
-          }}
-        >
+          <Link to="/register" className="ph-btn primary">
             Restaurant aanmelden
           </Link>
         </div>
       </header>
 
       <main>
-        <section
-          style={{
-            maxWidth: 1100,
-            margin: '0 auto',
-            padding: '60px 20px',
-            display: 'grid',
-            gap: 24,
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            alignItems: 'center',
-          }}
-        >
-          <div>
-            <p style={{ color: brand.primary, fontWeight: 700, marginBottom: 8 }}>
-              Voor restaurants
+        <section className="ph-hero">
+          <div className="ph-hero-copy ph-anim">
+            <p className="ph-pill">Voor restaurants</p>
+            <h1>Meer bestellingen. Lagere commissie. Volledige controle.</h1>
+            <p className="ph-hero-sub">
+              Video + bezorgen in één platform, speciaal voor restaurants.
             </p>
-            <h1 style={{ fontSize: 36, margin: '0 0 12px', color: brand.text }}>
-              Bereik meer klanten met Hapke
-            </h1>
-            <p style={{ color: brand.muted, fontSize: 16, lineHeight: 1.6, marginBottom: 16 }}>
-              Combineer video en bezorgen in één platform speciaal voor restaurants.
-            </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link
-                to="/register"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  background: brand.primary,
-                  color: '#fff',
-                  fontWeight: 700,
-                  boxShadow: `0 10px 30px ${brand.primary}40`,
-                }}
-              >
-                Maak een gratis account
+            <div className="ph-cta-row">
+              <Link to="/register" className="ph-btn primary lg">
+                Start gratis – geen contract
               </Link>
-              <Link
-                to="/login"
-                style={{
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  border: '1px solid #e2e8f0',
-                  color: brand.text,
-                  fontWeight: 600,
-                  background: '#fff',
-                }}
-              >
-                Log in
-              </Link>
+              <a className="ph-btn ghost lg" href="#hapke-video">
+                Bekijk hoe Hapke werkt (30 sec)
+              </a>
             </div>
           </div>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 16,
-              padding: 20,
-              boxShadow: '0 12px 36px rgba(0,0,0,0.08)',
-              color: brand.text,
-              lineHeight: 1.6,
-            }}
-          >
-            <strong style={{ display: 'block', marginBottom: 8 }}>Waarom Hapke?</strong>
-            <ul style={{ paddingLeft: 18, margin: 0, color: brand.muted }}>
-              <li>Lagere commissie dan grote platforms</li>
-              <li>Video’s van gerechten zorgen voor meer bestellingen</li>
-              <li>Eigen bezorgers of bezorging via Hapke</li>
-              <li>Alles in één portal en app</li>
-            </ul>
+          <div className="ph-hero-media ph-anim" id="hapke-video">
+            <div className="ph-media-shell">
+              <video
+                src="https://fyveoxtiwzzaarfltvrj.supabase.co/storage/v1/object/public/Restaurant-media/cmikduk8p0001roebleqt4b22/1766254304749.MOV"
+                muted
+                playsInline
+                loop
+                autoPlay
+              />
+            </div>
           </div>
         </section>
 
-        <PageSection title="Hoe werkt het?">
-          <div
-            style={{
-              display: 'grid',
-              gap: 12,
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            }}
-          >
-            <div style={bulletStyle}>1. Meld je restaurant aan</div>
-            <div style={bulletStyle}>2. Zet je menu en video’s online</div>
-            <div style={bulletStyle}>3. Ontvang bestellingen via app en portal</div>
+        <section className="ph-cta-repeat ph-anim">
+          <div className="ph-cta-repeat-inner">
+            <div>
+              <strong>Start gratis – binnen 5 minuten live</strong>
+              <p>Geen contract, geen opstartkosten, direct aan de slag.</p>
+            </div>
+            <Link to="/register" className="ph-btn primary">
+              Start gratis
+            </Link>
           </div>
-        </PageSection>
+        </section>
 
-        <PageSection title="Kosten">
-          <div
-            style={{
-              background: '#fff',
-              padding: 20,
-              borderRadius: 12,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
-            }}
-          >
-            Standaard 12% commissie op orders, geen opstartkosten.
+        <section className="ph-proof">
+          <h2>Waarom Hapke?</h2>
+          <div className="ph-card-grid">
+            {proofCards.map((card) => (
+              <div className="ph-card" key={card.title}>
+                <span className="ph-card-icon">{card.icon}</span>
+                <p>{card.title}</p>
+              </div>
+            ))}
           </div>
-        </PageSection>
+        </section>
+
+        <section className="ph-steps">
+          <h2>Hoe werkt het?</h2>
+          <div className="ph-step-grid">
+            {steps.map((step, idx) => (
+              <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
+                <div className="ph-step-icon">{step.icon}</div>
+                <div>
+                  <div className="ph-step-index">{idx + 1}</div>
+                  <p>{step.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="ph-costs ph-anim">
+          <div className="ph-costs-inner">
+            <div>
+              <p className="ph-pill ghost">Tarieven</p>
+              <h2>12% commissie</h2>
+              <ul>
+                <li>Geen opstartkosten</li>
+                <li>Geen abonnement</li>
+                <li>Opzegbaar wanneer je wilt</li>
+              </ul>
+              <Link to="/register" className="ph-btn primary lg">
+                Start gratis
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="ph-local">
+          <div>
+            <p className="ph-pill ghost">Lokaal & sociaal</p>
+            <h2>Hapke is gebouwd met en voor restaurants in Nijmegen.</h2>
+            <p className="ph-local-sub">
+              Lokaal gestart. Gericht op groei, niet op uitknijpen.
+            </p>
+          </div>
+          <div className="ph-local-placeholder">Logo’s / quotes van lokale partners</div>
+        </section>
+
+        <section className="ph-cta-final">
+          <div>
+            <h3>Start gratis – binnen 5 minuten live</h3>
+            <p>Activeer je restaurant, upload menu & video’s, ontvang bestellingen.</p>
+          </div>
+          <div className="ph-cta-final-actions">
+            <Link to="/register" className="ph-btn primary lg">
+              Start gratis
+            </Link>
+            <Link to="/login" className="ph-btn ghost lg">
+              Inloggen
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   )
