@@ -142,13 +142,17 @@
 }
 .ph-app-topbar {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 10px;
+  left: -14px;
+  right: -14px;
+  top: -14px;
   display: flex;
   align-items: center;
   gap: 10px;
   justify-content: space-between;
+  padding: 10px 16px;
+  background: #14b8a6;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
 }
 .ph-top-icon {
   pointer-events: auto;
@@ -256,7 +260,7 @@
   padding: 16px;
   color: #fff;
   pointer-events: auto;
-  margin-bottom: 80px;
+  margin-bottom: 96px;
 }
 .ph-order-btn {
   display: inline-flex;
@@ -286,12 +290,13 @@
 .ph-bottom-item {
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: #ecfdfb;
   display: grid;
   place-items: center;
   gap: 4px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 12px;
 }
 .ph-bottom-item.active {
   color: #ffc857;
