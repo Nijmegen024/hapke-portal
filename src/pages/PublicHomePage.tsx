@@ -5,16 +5,16 @@ import logo from '../../assets/icons/hapke_logo.png'
 import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
-  { title: 'Tot 30% meer bestellingen door video', icon: '📈' },
-  { title: '12% commissie (geen verborgen kosten)', icon: '💶' },
-  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '🛵' },
-  { title: 'Alles in één app en portal', icon: '📲' },
+  { title: 'Tot 30% meer bestellingen door video', icon: '' },
+  { title: '12% commissie (geen verborgen kosten)', icon: '' },
+  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
+  { title: 'Alles in één app en portal', icon: '' },
 ]
 
 const steps = [
-  { title: 'Restaurant aanmelden', icon: '✅' },
-  { title: 'Menu & video’s uploaden', icon: '🎥' },
-  { title: 'Bestellingen ontvangen', icon: '⚡️' },
+  { title: 'Restaurant aanmelden', icon: '' },
+  { title: 'Menu & video’s uploaden', icon: '' },
+  { title: 'Bestellingen ontvangen', icon: '' },
 ]
 
 export default function PublicHomePage() {
