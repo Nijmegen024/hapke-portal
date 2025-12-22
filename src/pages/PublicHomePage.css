@@ -214,6 +214,13 @@
   position: relative;
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
+.ph-icon-btn.heart {
+  background: linear-gradient(145deg, #ef476f, #f06595);
+  color: #fff;
+}
+.ph-icon-btn.bubble {
+  background: #fff;
+}
 .ph-icon-btn:hover {
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
@@ -236,6 +243,11 @@
   padding: 16px;
   color: #fff;
   pointer-events: auto;
+}
+.ph-order-btn {
+  display: inline-flex;
+  margin-top: 10px;
+  width: auto;
 }
 .ph-app-bottombar {
   position: absolute;

@@ -70,25 +70,22 @@ export default function PublicHomePage() {
                   </div>
                 </div>
                 <div className="ph-media-actions">
-                  <button className="ph-icon-btn" aria-label="Like">
-                    ❤️
+                  <button className="ph-icon-btn heart" aria-label="Like">
+                    <span className="material-icon">favorite</span>
                     <span className="ph-count">124</span>
                   </button>
-                  <button className="ph-icon-btn" aria-label="Comments">
-                    💬
+                  <button className="ph-icon-btn bubble" aria-label="Comments">
+                    <span className="material-icon">chat_bubble_outline</span>
                     <span className="ph-count">36</span>
                   </button>
-                  <button className="ph-icon-btn" aria-label="Delen">
-                    ↗
+                  <button className="ph-icon-btn bubble" aria-label="Delen">
+                    <span className="material-icon">share</span>
                   </button>
                 </div>
                 <div className="ph-media-bottom">
                   <p className="ph-media-label">Pizzeria Napoli</p>
                   <h3 className="ph-media-title">Prik water</h3>
-                  <div className="ph-media-cta-row">
-                    <button className="ph-btn primary">Bestel</button>
-                    <button className="ph-btn ghost">Deel</button>
-                  </div>
+                  <button className="ph-btn primary lg ph-order-btn">Bestel</button>
                 </div>
                 <div className="ph-app-bottombar">
                   <div className="ph-bottom-progress" />
