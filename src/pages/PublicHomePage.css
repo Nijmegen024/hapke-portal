@@ -127,6 +127,25 @@
   border-radius: 20px;
   display: block;
 }
+.ph-media-topbar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.ph-media-titlebar {
+  margin-right: auto;
+  padding: 8px 12px;
+  background: rgba(20, 184, 166, 0.95);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(20, 184, 166, 0.25);
+}
 .ph-media-overlay {
   position: absolute;
   inset: 14px;
@@ -160,8 +179,8 @@
 }
 .ph-media-actions {
   position: absolute;
-  right: 14px;
-  bottom: 140px;
+  right: 8px;
+  bottom: 130px;
   display: flex;
   flex-direction: column;
   gap: 10px;
