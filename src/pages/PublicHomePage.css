@@ -126,8 +126,27 @@
   display: flex;
   justify-content: center;
 }
+.ph-phone-frame {
+  width: min(420px, 100%);
+  padding: 16px;
+  border-radius: 34px;
+  background: #0b1220;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+  position: relative;
+}
+.ph-phone-notch {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 26px;
+  background: #0b1220;
+  border-radius: 16px;
+  z-index: 2;
+}
 .ph-media-shell {
-  width: min(520px, 100%);
+  width: 100%;
   border-radius: 28px;
   background: linear-gradient(145deg, #ffffff, #e8fffb);
   padding: 14px;
