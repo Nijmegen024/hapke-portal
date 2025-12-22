@@ -128,32 +128,34 @@
 }
 .ph-phone-frame {
   width: min(420px, 100%);
-  padding: 12px;
-  border-radius: 36px;
-  background: radial-gradient(circle at 50% 20%, #0f172a, #0b1220 80%);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  border-radius: 38px;
+  background: #0b1220;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.12);
   position: relative;
+  overflow: hidden;
 }
 .ph-phone-notch {
   position: absolute;
-  top: 8px;
+  top: 6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
-  height: 28px;
+  width: 140px;
+  height: 30px;
   background: #0b1220;
   border-radius: 18px;
   z-index: 2;
-  box-shadow: inset 0 -4px 8px rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 -4px 8px rgba(255, 255, 255, 0.05);
 }
 .ph-media-shell {
   width: 100%;
   border-radius: 30px;
-  background: linear-gradient(145deg, #ffffff, #e8fffb);
-  padding: 14px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
   position: relative;
   overflow: hidden;
+  min-height: 720px;
 }
 .ph-media-shell video {
   width: 100%;
