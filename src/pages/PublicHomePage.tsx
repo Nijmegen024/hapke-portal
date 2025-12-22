@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import './PublicHomePage.css'
 import logo from '../../assets/icons/hapke_logo.png'
+import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
   { title: 'Tot 30% meer bestellingen door video', icon: '📈' },
