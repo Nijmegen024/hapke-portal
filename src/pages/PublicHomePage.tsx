@@ -60,6 +60,36 @@ export default function PublicHomePage() {
                 loop
                 autoPlay
               />
+              <div className="ph-media-overlay">
+                <div className="ph-media-top">
+                  <span className="ph-live-badge">Live uit de app</span>
+                  <span className="ph-chip">Pizzeria Napoli · 35–45 min</span>
+                </div>
+                <div className="ph-media-actions">
+                  <button className="ph-icon-btn" aria-label="Like">
+                    ❤️
+                    <span className="ph-count">124</span>
+                  </button>
+                  <button className="ph-icon-btn" aria-label="Comments">
+                    💬
+                    <span className="ph-count">36</span>
+                  </button>
+                  <button className="ph-icon-btn" aria-label="Delen">
+                    ↗
+                  </button>
+                </div>
+                <div className="ph-media-bottom">
+                  <div>
+                    <p className="ph-media-label">Video uit de klant-app</p>
+                    <h3 className="ph-media-title">Nootjes</h3>
+                    <p className="ph-media-price">€ 3,50</p>
+                  </div>
+                  <div className="ph-media-cta-row">
+                    <button className="ph-btn primary">Bestel</button>
+                    <button className="ph-btn ghost">Deel</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
