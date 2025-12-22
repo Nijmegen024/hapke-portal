@@ -127,44 +127,34 @@
   display: flex;
   justify-content: center;
 }
-.ph-phone-frame {
-  width: min(420px, 100%);
-  padding: 16px;
-  border-radius: 38px;
-  background: #0b1220;
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.12);
+.phoneWrap {
   position: relative;
-  overflow: hidden;
+  width: min(420px, 42vw);
+  aspect-ratio: 9 / 19.5;
+  margin-left: auto;
+  filter: drop-shadow(0 22px 45px rgba(0, 0, 0, 0.22));
 }
-.ph-phone-notch {
+.screen {
   position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140px;
-  height: 30px;
-  background: #0b1220;
-  border-radius: 18px;
-  z-index: 2;
-  box-shadow: inset 0 -4px 8px rgba(255, 255, 255, 0.05);
-}
-.ph-media-shell {
-  width: 100%;
-  border-radius: 30px;
-  background: #0b1220;
-  padding: 10px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-  position: relative;
+  inset: 4.2% 6.2%;
+  border-radius: 28px;
   overflow: hidden;
-  min-height: 720px;
-  border: 10px solid #0b1220;
+  background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
 }
-.ph-media-shell video {
-  width: 102%;
-  margin-left: -1%;
-  border-radius: 20px;
+.screenVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
+}
+.frameOverlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
 }
 .ph-app-topbar {
   position: absolute;
