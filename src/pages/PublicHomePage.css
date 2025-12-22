@@ -1,7 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
+
 .ph-page {
   min-height: 100vh;
   background: radial-gradient(circle at 10% 20%, #ecfeff 0, #f7fffb 25%, #f6fbfb 60%);
   color: #0d2438;
+}
+
+.material-icon {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: normal;
+  display: inline-block;
+  text-transform: none;
 }
 
 .ph-header {
@@ -139,7 +152,7 @@
 }
 .ph-top-icon {
   pointer-events: auto;
-  background: #0fb29f;
+  background: #14b8a6;
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -243,6 +256,7 @@
   padding: 16px;
   color: #fff;
   pointer-events: auto;
+  margin-bottom: 80px;
 }
 .ph-order-btn {
   display: inline-flex;
@@ -255,7 +269,7 @@
   right: -14px;
   bottom: -10px;
   padding: 10px 16px 16px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 70%);
+  background: linear-gradient(180deg, #14b8a6 0%, #0f9f90 90%);
   pointer-events: auto;
 }
 .ph-bottom-progress {
