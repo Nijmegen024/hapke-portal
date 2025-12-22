@@ -127,18 +127,32 @@
   border-radius: 20px;
   display: block;
 }
-.ph-media-topbar {
+.ph-app-topbar {
   position: absolute;
-  left: 12px;
-  right: 12px;
+  left: 10px;
+  right: 10px;
   top: 10px;
   display: flex;
   align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+.ph-top-icon {
+  pointer-events: auto;
+  background: #0fb29f;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(15, 178, 159, 0.3);
+  cursor: pointer;
+}
+.ph-top-actions {
+  display: flex;
   gap: 8px;
-  justify-content: flex-end;
 }
 .ph-media-titlebar {
-  margin-right: auto;
   padding: 8px 12px;
   background: rgba(20, 184, 166, 0.95);
   color: #fff;
@@ -222,6 +236,39 @@
   padding: 16px;
   color: #fff;
   pointer-events: auto;
+}
+.ph-app-bottombar {
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  bottom: -10px;
+  padding: 10px 16px 16px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 70%);
+  pointer-events: auto;
+}
+.ph-bottom-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+.ph-bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.ph-bottom-item {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ph-bottom-item.active {
+  color: #ffc857;
 }
 .ph-media-label {
   margin: 0 0 4px;

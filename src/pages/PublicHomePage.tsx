@@ -61,10 +61,13 @@ export default function PublicHomePage() {
                 autoPlay
               />
               <div className="ph-media-overlay">
-                <div className="ph-media-topbar">
+                <div className="ph-app-topbar">
+                  <button className="ph-top-icon">←</button>
                   <div className="ph-media-titlebar">Video&apos;s</div>
-                  <button className="ph-icon-btn ghost" aria-label="Refresh">↻</button>
-                  <button className="ph-icon-btn ghost" aria-label="Mute">🔇</button>
+                  <div className="ph-top-actions">
+                    <button className="ph-top-icon">↻</button>
+                    <button className="ph-top-icon">🔇</button>
+                  </div>
                 </div>
                 <div className="ph-media-actions">
                   <button className="ph-icon-btn" aria-label="Like">
@@ -85,6 +88,31 @@ export default function PublicHomePage() {
                   <div className="ph-media-cta-row">
                     <button className="ph-btn primary">Bestel</button>
                     <button className="ph-btn ghost">Deel</button>
+                  </div>
+                </div>
+                <div className="ph-app-bottombar">
+                  <div className="ph-bottom-progress" />
+                  <div className="ph-bottom-nav">
+                    <button className="ph-bottom-item">
+                      <span>🧭</span>
+                      <small>Ontdek</small>
+                    </button>
+                    <button className="ph-bottom-item active">
+                      <span>🎬</span>
+                      <small>Video&apos;s</small>
+                    </button>
+                    <button className="ph-bottom-item">
+                      <span>🛍️</span>
+                      <small>MANDDD!!</small>
+                    </button>
+                    <button className="ph-bottom-item">
+                      <span>👥</span>
+                      <small>Vrienden</small>
+                    </button>
+                    <button className="ph-bottom-item">
+                      <span>👤</span>
+                      <small>Account</small>
+                    </button>
                   </div>
                 </div>
               </div>
