@@ -128,26 +128,27 @@
 }
 .ph-phone-frame {
   width: min(420px, 100%);
-  padding: 16px;
-  border-radius: 34px;
-  background: #0b1220;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+  padding: 12px;
+  border-radius: 36px;
+  background: radial-gradient(circle at 50% 20%, #0f172a, #0b1220 80%);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15);
   position: relative;
 }
 .ph-phone-notch {
   position: absolute;
-  top: 10px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
-  height: 26px;
+  height: 28px;
   background: #0b1220;
-  border-radius: 16px;
+  border-radius: 18px;
   z-index: 2;
+  box-shadow: inset 0 -4px 8px rgba(255, 255, 255, 0.04);
 }
 .ph-media-shell {
   width: 100%;
-  border-radius: 28px;
+  border-radius: 30px;
   background: linear-gradient(145deg, #ffffff, #e8fffb);
   padding: 14px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
@@ -230,7 +231,7 @@
 .ph-media-actions {
   position: absolute;
   right: 8px;
-  bottom: 130px;
+  bottom: 122px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -249,6 +250,9 @@
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
   position: relative;
   transition: transform 140ms ease, box-shadow 140ms ease;
+}
+.ph-icon-btn .material-icon {
+  font-size: 22px;
 }
 .ph-icon-btn.heart {
   background: linear-gradient(145deg, #ef476f, #f06595);
@@ -279,7 +283,7 @@
   padding: 16px;
   color: #fff;
   pointer-events: auto;
-  margin-bottom: 96px;
+  margin-bottom: 108px;
 }
 .ph-order-btn {
   display: inline-flex;
@@ -305,6 +309,7 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
+  align-items: center;
 }
 .ph-bottom-item {
   background: transparent;
@@ -312,7 +317,7 @@
   color: #ecfdfb;
   display: grid;
   place-items: center;
-  gap: 4px;
+  gap: 2px;
   font-weight: 600;
   cursor: pointer;
   font-size: 12px;
