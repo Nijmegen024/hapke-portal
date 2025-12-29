@@ -146,6 +146,9 @@
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
 }
+.screen > * {
+  border-radius: inherit;
+}
 .screenVideo {
   width: 100%;
   height: 100%;
@@ -155,6 +158,7 @@
 }
 .ph-media-overlay {
   border-radius: 46px;
+  overflow: hidden;
 }
 .frameOverlay {
   position: relative;
@@ -305,6 +309,9 @@
   display: inline-flex;
   margin-top: 10px;
   width: auto;
+  box-shadow: none !important;
+}
+.ph-media-bottom .ph-btn {
   box-shadow: none !important;
 }
 .ph-app-bottombar {
