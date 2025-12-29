@@ -137,6 +137,7 @@
   transform: none;
   border-radius: 52px;
   overflow: hidden;
+  background: #0d1c2f;
 }
 .screen {
   position: absolute;
@@ -161,12 +162,7 @@
   overflow: hidden;
 }
 .frameOverlay {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-  user-select: none;
+  display: none;
 }
 .ph-live-floating {
   position: absolute;
