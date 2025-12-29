@@ -186,10 +186,10 @@
   align-items: center;
   gap: 10px;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: 10px 10px;
   background: #14b8a6;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .ph-top-icon {
   pointer-events: auto;
@@ -316,10 +316,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 10px 10px 10px;
+  padding: 10px 10px;
   background: linear-gradient(180deg, #14b8a6 0%, #0f9f90 90%);
   pointer-events: auto;
-  border-radius: 0 0 36px 36px;
+  border-radius: 0;
   box-shadow: none;
 }
 .ph-bottom-progress {
