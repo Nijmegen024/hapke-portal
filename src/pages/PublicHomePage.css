@@ -23,8 +23,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 22px;
-  background: #ffffff;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -74,13 +75,13 @@
   box-shadow: 0 14px 34px rgba(20, 184, 166, 0.3);
 }
 .ph-btn.ghost {
-  background: #fff;
+  background: transparent;
   color: #0d2438;
-  border-color: #e2e8f0;
+  border-color: #d8dee9;
 }
 .ph-btn.ghost:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .ph-hero {
@@ -132,7 +133,8 @@
   width: min(420px, 42vw);
   aspect-ratio: 9 / 19.5;
   margin-left: auto;
-  filter: drop-shadow(0 22px 45px rgba(0, 0, 0, 0.22));
+  filter: drop-shadow(0 26px 55px rgba(0, 0, 0, 0.26));
+  transform: rotate(-1deg);
 }
 .screen {
   position: absolute;
@@ -155,6 +157,18 @@
   display: block;
   pointer-events: none;
   user-select: none;
+}
+.ph-live-floating {
+  position: absolute;
+  top: -16px;
+  right: 6px;
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  box-shadow: 0 14px 30px rgba(244, 63, 94, 0.35);
+  z-index: 2;
 }
 .ph-app-topbar {
   position: absolute;
@@ -389,7 +403,7 @@
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
 }
 .ph-card-icon {
-  display: none;
+  font-size: 18px;
 }
 
 .ph-steps {
@@ -414,7 +428,8 @@
   opacity: 0;
 }
 .ph-step-icon {
-  display: none;
+  font-size: 18px;
+  margin-right: 4px;
 }
 .ph-step-index {
   font-weight: 800;
@@ -437,6 +452,10 @@
 .ph-costs-inner h2 {
   margin: 6px 0 12px;
   font-size: 32px;
+}
+.ph-costs-sub {
+  margin: 0 0 10px;
+  font-weight: 600;
 }
 .ph-costs-inner ul {
   padding-left: 18px;

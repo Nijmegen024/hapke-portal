@@ -5,16 +5,16 @@ import logo from '../../assets/icons/hapke_logo.png'
 import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
-  { title: 'Tot 30% meer bestellingen door video', icon: '' },
-  { title: '12% commissie (geen verborgen kosten)', icon: '' },
-  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
-  { title: 'Alles in één app en portal', icon: '' },
+  { title: 'Tot 30% meer bestellingen door video', icon: '📈' },
+  { title: '12% commissie (geen verborgen kosten)', icon: '✅' },
+  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '🛵' },
+  { title: 'Alles in één app en portal', icon: '📱' },
 ]
 
 const steps = [
-  { title: 'Restaurant aanmelden', icon: '' },
-  { title: 'Menu & video’s uploaden', icon: '' },
-  { title: 'Bestellingen ontvangen', icon: '' },
+  { title: 'Restaurant aanmelden', icon: '📝' },
+  { title: 'Menu & video’s uploaden', icon: '🎬' },
+  { title: 'Bestellingen ontvangen', icon: '📦' },
 ]
 
 export default function PublicHomePage() {
@@ -53,6 +53,7 @@ export default function PublicHomePage() {
             </div>
           </div>
         <div className="ph-hero-media ph-anim" id="hapke-video">
+          <div className="ph-live-floating">Live demo</div>
           <div className="phoneWrap">
             <div className="screen">
               <video
@@ -166,6 +167,7 @@ export default function PublicHomePage() {
             <div>
               <p className="ph-pill ghost">Tarieven</p>
               <h2>12% commissie</h2>
+              <p className="ph-costs-sub">Transparant: 12% per order, verder niets.</p>
               <ul>
                 <li>Geen opstartkosten</li>
                 <li>Geen abonnement</li>
