@@ -139,7 +139,7 @@
 .screen {
   position: absolute;
   inset: 3.6% 4.4%;
-  border-radius: 34px;
+  border-radius: 40px;
   overflow: hidden;
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
@@ -149,6 +149,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 40px;
 }
 .frameOverlay {
   position: relative;
@@ -299,6 +300,7 @@
   display: inline-flex;
   margin-top: 10px;
   width: auto;
+  box-shadow: none;
 }
 .ph-app-bottombar {
   position: absolute;
