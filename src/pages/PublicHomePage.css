@@ -133,13 +133,13 @@
   width: min(420px, 42vw);
   aspect-ratio: 9 / 19.5;
   margin-left: auto;
-  filter: drop-shadow(0 26px 55px rgba(0, 0, 0, 0.26));
-  transform: rotate(-1deg);
+  filter: none;
+  transform: none;
 }
 .screen {
   position: absolute;
-  inset: 3.2% 4.2%;
-  border-radius: 28px;
+  inset: 3.6% 4.4%;
+  border-radius: 34px;
   overflow: hidden;
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
