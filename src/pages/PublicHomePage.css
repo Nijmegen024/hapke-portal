@@ -135,6 +135,8 @@
   margin-left: auto;
   filter: none;
   transform: none;
+  border-radius: 52px;
+  overflow: hidden;
 }
 .screen {
   position: absolute;
