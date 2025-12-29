@@ -153,6 +153,9 @@
   display: block;
   border-radius: 46px;
 }
+.ph-media-overlay {
+  border-radius: 46px;
+}
 .frameOverlay {
   position: relative;
   width: 100%;
@@ -302,7 +305,7 @@
   display: inline-flex;
   margin-top: 10px;
   width: auto;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 .ph-app-bottombar {
   position: absolute;
