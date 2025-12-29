@@ -160,6 +160,7 @@
 .ph-media-overlay {
   border-radius: 46px;
   overflow: hidden;
+  inset: 0;
 }
 .frameOverlay {
   display: none;
