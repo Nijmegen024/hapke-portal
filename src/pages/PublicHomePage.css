@@ -158,9 +158,14 @@
   border-radius: 46px;
 }
 .ph-media-overlay {
+  position: absolute;
+  inset: 0;
   border-radius: 46px;
   overflow: hidden;
-  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .frameOverlay {
   display: none;
@@ -186,10 +191,10 @@
   align-items: center;
   gap: 10px;
   justify-content: space-between;
-  padding: 10px 10px;
+  padding: 10px 12px;
   background: #14b8a6;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+  border-top-left-radius: 46px;
+  border-top-right-radius: 46px;
 }
 .ph-top-icon {
   pointer-events: auto;
@@ -213,14 +218,6 @@
   border-radius: 12px;
   font-weight: 700;
   box-shadow: 0 10px 20px rgba(20, 184, 166, 0.25);
-}
-.ph-media-overlay {
-  position: absolute;
-  inset: 14px;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 .ph-media-top {
   display: flex;
@@ -316,10 +313,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 10px 10px;
+  padding: 12px 12px;
   background: linear-gradient(180deg, #14b8a6 0%, #0f9f90 90%);
   pointer-events: auto;
-  border-radius: 0;
+  border-radius: 0 0 46px 46px;
   box-shadow: none;
 }
 .ph-bottom-progress {
