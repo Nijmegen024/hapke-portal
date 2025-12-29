@@ -139,7 +139,7 @@
 .screen {
   position: absolute;
   inset: 3.6% 4.4%;
-  border-radius: 40px;
+  border-radius: 46px;
   overflow: hidden;
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
@@ -149,7 +149,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 40px;
+  border-radius: 46px;
 }
 .frameOverlay {
   position: relative;
@@ -290,7 +290,7 @@
 .ph-media-bottom {
   margin-top: auto;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 80%);
-  border-radius: 18px;
+  border-radius: 24px;
   padding: 16px;
   color: #fff;
   pointer-events: auto;
@@ -310,6 +310,8 @@
   padding: 10px 16px 16px;
   background: linear-gradient(180deg, #14b8a6 0%, #0f9f90 90%);
   pointer-events: auto;
+  border-radius: 0 0 36px 36px;
+  box-shadow: none;
 }
 .ph-bottom-progress {
   height: 6px;
