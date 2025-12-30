@@ -413,7 +413,7 @@
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
 }
 .ph-card-icon {
-  font-size: 18px;
+  display: none;
 }
 
 .ph-steps {
