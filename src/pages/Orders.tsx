@@ -16,6 +16,9 @@ type OrderItem = {
   title?: string
   productName?: string
   itemName?: string
+  displayName?: string
+  productTitle?: string
+  label?: string
   qty: number
   price?: number
 }
@@ -106,7 +109,15 @@ export default function Orders() {
           <ul>
             {o.items.map((it,i)=>{
               const label =
-                (it.name ?? it.title ?? it.productName ?? it.itemName ?? it.id ?? '').toString().trim() || 'Onbekend item'
+                (it.displayName ??
+                  it.productTitle ??
+                  it.label ??
+                  it.name ??
+                  it.title ??
+                  it.productName ??
+                  it.itemName ??
+                  it.id ??
+                  '').toString().trim() || 'Onbekend item'
               return <li key={i}>{it.qty}× {label}</li>
             })}
           </ul>
