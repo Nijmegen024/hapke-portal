@@ -10,7 +10,15 @@ const STATUS_ACTIONS = [
   { label: 'Afgeleverd', value: 'DELIVERED' },
 ]
 
-type OrderItem = { name: string; qty: number; price?: number }
+type OrderItem = {
+  id?: string
+  name?: string
+  title?: string
+  productName?: string
+  itemName?: string
+  qty: number
+  price?: number
+}
 type Order = { id: string; createdAt: string; items: OrderItem[]; note?: string; total?: number; status: string }
 
 export default function Orders() {
@@ -95,7 +103,13 @@ export default function Orders() {
           <div style={{display:'flex',justifyContent:'space-between'}}>
             <strong>#{o.id}</strong><span>{new Date(o.createdAt).toLocaleTimeString()}</span>
           </div>
-          <ul>{o.items.map((it,i)=><li key={i}>{it.qty}× {it.name}</li>)}</ul>
+          <ul>
+            {o.items.map((it,i)=>{
+              const label =
+                (it.name ?? it.title ?? it.productName ?? it.itemName ?? it.id ?? '').toString().trim() || 'Onbekend item'
+              return <li key={i}>{it.qty}× {label}</li>
+            })}
+          </ul>
           {o.note&&<div><em>Opmerking:</em> {o.note}</div>}
           {typeof o.total==='number'&&<div><strong>Totaal:</strong> €{o.total.toFixed(2)}</div>}
           <div style={{marginTop:12,display:'flex',gap:8,flexWrap:'wrap'}}>
