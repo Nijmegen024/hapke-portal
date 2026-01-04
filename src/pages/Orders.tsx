@@ -141,18 +141,18 @@ export default function Orders() {
           </div>
           <ul>
             {o.items.map((it,i)=>{
-              const label =
+              const label = (
                 itemNameMap[it.id ?? ''] ??
-                (it.displayName ??
-                  it.productTitle ??
-                  it.label ??
-                  it.name ??
-                  it.title ??
-                  it.productName ??
-                  it.itemName ??
-                  it.id ??
-                  '').toString().trim() ||
-                'Onbekend item'
+                it.displayName ??
+                it.productTitle ??
+                it.label ??
+                it.name ??
+                it.title ??
+                it.productName ??
+                it.itemName ??
+                it.id ??
+                ''
+              ).toString().trim() || 'Onbekend item'
               return <li key={i}>{it.qty}× {label}</li>
             })}
           </ul>
