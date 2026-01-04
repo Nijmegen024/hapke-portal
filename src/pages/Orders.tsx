@@ -30,6 +30,7 @@ export default function Orders() {
   const [authed, setAuthed] = useState<boolean>(true)
   const [loadingOrders, setLoadingOrders] = useState<Record<string, boolean>>({})
   const [statusMessages, setStatusMessages] = useState<Record<string, string>>({})
+  const [itemNameMap, setItemNameMap] = useState<Record<string, string>>({})
   const pollRef = useRef<number | null>(null)
   const navigate = useNavigate()
 
@@ -48,6 +49,37 @@ export default function Orders() {
     localStorage.removeItem(TOKEN_KEY)
     navigate('/login', { replace: true })
   },[clearPoll,navigate])
+
+  const fetchMenu = useCallback(async ()=>{
+    try{
+      const token = localStorage.getItem(TOKEN_KEY)
+      const headers: Record<string,string> = {}
+      if(token) headers.Authorization = `Bearer ${token}`
+      const res = await fetch(`${API_BASE}/vendor/menu`,{
+        credentials:'include',
+        headers,
+      })
+      if(res.status===401){
+        redirectToLogin()
+        return
+      }
+      if(!res.ok) return
+      const data = await res.json()
+      const map: Record<string,string> = {}
+      if(Array.isArray(data)){
+        data.forEach((cat:any)=>{
+          if(Array.isArray(cat?.items)){
+            cat.items.forEach((item:any)=>{
+              if(item?.id){
+                map[String(item.id)] = (item.name ?? item.title ?? '').toString()
+              }
+            })
+          }
+        })
+      }
+      setItemNameMap(map)
+    }catch(_e){}
+  },[redirectToLogin])
 
   const fetchOrders = useCallback(async ()=>{
     try{
@@ -77,6 +109,7 @@ export default function Orders() {
   },[redirectToLogin])
 
   useEffect(()=>{
+    fetchMenu()
     fetchOrders()
     pollRef.current = window.setInterval(fetchOrders, 5000)
     return clearPoll
@@ -109,6 +142,7 @@ export default function Orders() {
           <ul>
             {o.items.map((it,i)=>{
               const label =
+                itemNameMap[it.id ?? ''] ??
                 (it.displayName ??
                   it.productTitle ??
                   it.label ??
@@ -117,7 +151,8 @@ export default function Orders() {
                   it.productName ??
                   it.itemName ??
                   it.id ??
-                  '').toString().trim() || 'Onbekend item'
+                  '').toString().trim() ||
+                'Onbekend item'
               return <li key={i}>{it.qty}× {label}</li>
             })}
           </ul>
