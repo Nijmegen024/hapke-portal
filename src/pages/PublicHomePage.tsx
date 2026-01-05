@@ -6,14 +6,21 @@ import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
   { title: 'Tot 30% meer bestellingen door video', icon: '' },
-  { title: '12% commissie (kan dalen tot 3%)', icon: '' },
+  {
+    title: 'Start op 12% → groei naar 3% commissie',
+    sub: 'Bij stijgend ordervolume.',
+    icon: '',
+  },
   { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
-  { title: 'Alles in één app en portal', icon: '' },
+  {
+    title: 'Bestellingen, video’s en inzichten in één dashboard',
+    icon: '',
+  },
 ]
 
 const steps = [
   { title: 'Restaurant aanmelden', icon: '' },
-  { title: 'Menu & video’s uploaden', icon: '' },
+  { title: 'Upload menu + korte video’s (telefoon is genoeg)', icon: '' },
   { title: 'Bestellingen ontvangen', icon: '' },
 ]
 
@@ -42,6 +49,9 @@ export default function PublicHomePage() {
             <h1>Meer bestellingen. Lagere commissie. Volledige controle.</h1>
             <p className="ph-hero-sub">
               Video + bezorgen in één platform, speciaal voor restaurants.
+            </p>
+            <p className="ph-hero-sub small">
+              Speciaal voor lokale restaurants in Nijmegen (en omgeving).
             </p>
             <div className="ph-cta-row">
               <a className="ph-btn ghost lg" href="#hapke-video">
@@ -127,6 +137,7 @@ export default function PublicHomePage() {
               <div className="ph-card" key={card.title}>
                 <span className="ph-card-icon">{card.icon}</span>
                 <p>{card.title}</p>
+                {card.sub && <small className="ph-card-sub">{card.sub}</small>}
               </div>
             ))}
           </div>
@@ -134,6 +145,7 @@ export default function PublicHomePage() {
 
         <section className="ph-steps">
           <h2>Hoe werkt het?</h2>
+          <p className="ph-steps-sub">Gemiddelde setup: 5–10 minuten.</p>
           <div className="ph-step-grid">
             {steps.map((step, idx) => (
               <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
@@ -151,8 +163,15 @@ export default function PublicHomePage() {
           <div className="ph-costs-inner">
             <div>
               <p className="ph-pill ghost">Tarieven</p>
-              <h2>12% commissie</h2>
-              <p className="ph-costs-sub">Transparant: 12% per order, verder niets.</p>
+              <h2>Start op 12%. Groei naar 3%.</h2>
+              <p className="ph-costs-sub">
+                Voor de eerste 10 restaurants belonen we groei met lagere commissie.
+              </p>
+              <ul className="ph-costs-tiers">
+                <li>2.000 orders → 10%</li>
+                <li>5.000 orders → 8%</li>
+                <li>10.000 orders → 3%</li>
+              </ul>
               <ul>
                 <li>Geen opstartkosten</li>
                 <li>Geen abonnement</li>
@@ -167,7 +186,8 @@ export default function PublicHomePage() {
             <p className="ph-pill ghost">Lokaal & sociaal</p>
             <h2>Hapke is gebouwd met en voor restaurants in Nijmegen.</h2>
             <p className="ph-local-sub">
-              Lokaal gestart. Gericht op groei, niet op uitknijpen.
+              Lokaal gestart. Gericht op groei, niet op uitknijpen. Gebouwd samen met
+              Nijmeegse restaurants, niet door een anoniem platform.
             </p>
           </div>
           <div className="ph-local-placeholder">Logo’s / quotes van lokale partners</div>
@@ -176,14 +196,11 @@ export default function PublicHomePage() {
         <section className="ph-cta-final">
           <div>
             <h3>Start gratis – binnen 5 minuten live</h3>
-            <p>Activeer je restaurant, upload menu & video’s, ontvang bestellingen.</p>
+            <p>Geen contract. Binnen 5 minuten live.</p>
           </div>
           <div className="ph-cta-final-actions">
             <Link to="/register" className="ph-btn primary lg">
               Start gratis
-            </Link>
-            <Link to="/login" className="ph-btn ghost lg">
-              Inloggen
             </Link>
           </div>
         </section>
