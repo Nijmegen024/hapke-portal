@@ -6,7 +6,7 @@ import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
   { title: 'Tot 30% meer bestellingen door video', icon: '' },
-  { title: '12% commissie (geen verborgen kosten)', icon: '' },
+  { title: '12% commissie (kan dalen tot 3%)', icon: '' },
   { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
   { title: 'Alles in één app en portal', icon: '' },
 ]
@@ -44,9 +44,6 @@ export default function PublicHomePage() {
               Video + bezorgen in één platform, speciaal voor restaurants.
             </p>
             <div className="ph-cta-row">
-              <Link to="/register" className="ph-btn primary lg">
-                Start gratis – geen contract
-              </Link>
               <a className="ph-btn ghost lg" href="#hapke-video">
                 Bekijk hoe Hapke werkt (30 sec)
               </a>
@@ -123,18 +120,6 @@ export default function PublicHomePage() {
         </div>
       </section>
 
-        <section className="ph-cta-repeat ph-anim">
-          <div className="ph-cta-repeat-inner">
-            <div>
-              <strong>Start gratis – binnen 5 minuten live</strong>
-              <p>Geen contract, geen opstartkosten, direct aan de slag.</p>
-            </div>
-            <Link to="/register" className="ph-btn primary">
-              Start gratis
-            </Link>
-          </div>
-        </section>
-
         <section className="ph-proof">
           <h2>Waarom Hapke?</h2>
           <div className="ph-card-grid">
@@ -173,9 +158,6 @@ export default function PublicHomePage() {
                 <li>Geen abonnement</li>
                 <li>Opzegbaar wanneer je wilt</li>
               </ul>
-              <Link to="/register" className="ph-btn primary lg">
-                Start gratis
-              </Link>
             </div>
           </div>
         </section>
