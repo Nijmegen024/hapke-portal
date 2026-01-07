@@ -65,7 +65,7 @@ export default function PublicHomePage() {
             <div className="screen">
               <video
                 className="screenVideo"
-                src="https://fyveoxtiwzzaarfltvrj.supabase.co/storage/v1/object/public/Restaurant-media/cmikduk8p0001roebleqt4b22/1766254304749.MOV"
+                src="/16423978-uhd_2160_3840_25fps.mp4"
                 muted
                 playsInline
                 loop
