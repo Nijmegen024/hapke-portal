@@ -489,6 +489,11 @@
 .ph-costs-tiers li {
   margin: 3px 0;
 }
+.ph-costs-footnote {
+  margin: 0 0 10px;
+  color: #e0f2f1;
+  font-size: 13px;
+}
 .ph-costs-inner ul {
   padding-left: 18px;
   line-height: 1.8;

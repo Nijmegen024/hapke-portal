@@ -7,8 +7,8 @@ import iphoneFrame from '../assets/iphone-frame.png'
 const proofCards = [
   { title: 'Tot 30% meer bestellingen door video', icon: '' },
   {
-    title: 'Start op 12% → groei naar 3% commissie',
-    sub: 'Bij stijgend ordervolume.',
+    title: 'Eerlijke commissie die meegroeit met je succes',
+    sub: 'Start op 12%, daalt tot 3% bij volume.',
     icon: '',
   },
   { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
@@ -165,13 +165,16 @@ export default function PublicHomePage() {
               <p className="ph-pill ghost">Tarieven</p>
               <h2>Start op 12%. Groei naar 3%.</h2>
               <p className="ph-costs-sub">
-                Voor de eerste 10 restaurants belonen we groei met lagere commissie.
+                We belonen groei. Hoe meer bestellingen via Hapke, hoe lager je commissie.
               </p>
               <ul className="ph-costs-tiers">
-                <li>2.000 orders → 10%</li>
-                <li>5.000 orders → 8%</li>
-                <li>10.000 orders → 3%</li>
+                <li>1.000 orders → 10%</li>
+                <li>2.500 orders → 8%</li>
+                <li>5.000 orders → 3%</li>
               </ul>
+              <p className="ph-costs-footnote">
+                Staffels gelden op basis van totaal aantal bestellingen.
+              </p>
               <ul>
                 <li>Geen opstartkosten</li>
                 <li>Geen abonnement</li>
