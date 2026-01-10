@@ -14,6 +14,9 @@ type RestaurantResponse = {
   minOrderAmount?: number | null
   minOrderValue?: number | null
   heroImageUrl?: string | null
+  lat?: number | null
+  lng?: number | null
+  deliveryRadiusKm?: number | null
 }
 
 type FormState = {
@@ -21,6 +24,9 @@ type FormState = {
   description: string
   minOrderAmount: string
   heroImageUrl: string
+  lat: string
+  lng: string
+  deliveryRadiusKm: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -28,6 +34,9 @@ const EMPTY_FORM: FormState = {
   description: '',
   minOrderAmount: '',
   heroImageUrl: '',
+  lat: '',
+  lng: '',
+  deliveryRadiusKm: '5',
 }
 
 export default function Settings() {
@@ -69,6 +78,9 @@ export default function Settings() {
         description: data.description ?? '',
         minOrderAmount: resolveMinimumOrderAmount(data),
         heroImageUrl: data.heroImageUrl ?? '',
+        lat: formatNumber(data.lat),
+        lng: formatNumber(data.lng),
+        deliveryRadiusKm: formatNumber(data.deliveryRadiusKm, '5'),
       })
     } catch (err: any) {
       setError(err?.message || 'Kon restaurantgegevens niet laden')
@@ -100,6 +112,11 @@ export default function Settings() {
     return ''
   }
 
+  function formatNumber(value: number | null | undefined, fallback = '') {
+    if (value === null || value === undefined) return fallback
+    return String(value)
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (saving) return
@@ -119,6 +136,12 @@ export default function Settings() {
       return
     }
 
+    const parsedLat = form.lat.trim() ? parseFloat(form.lat.trim()) : null
+    const parsedLng = form.lng.trim() ? parseFloat(form.lng.trim()) : null
+    const parsedRadius = form.deliveryRadiusKm.trim()
+      ? parseFloat(form.deliveryRadiusKm.trim())
+      : null
+
     setSaving(true)
     try {
       const headers: Record<string, string> = {
@@ -132,6 +155,9 @@ export default function Settings() {
         description: form.description.trim(),
         minimumOrderAmount: Number(parsedValue.toFixed(2)),
         heroImageUrl: form.heroImageUrl.trim() || null,
+        lat: parsedLat,
+        lng: parsedLng,
+        deliveryRadiusKm: parsedRadius ?? 5,
       }
       const res = await fetch(`${API_BASE}/vendor/restaurant`, {
         method: 'PUT',
@@ -152,6 +178,11 @@ export default function Settings() {
         description: data.description ?? payload.description,
         minOrderAmount: resolveMinimumOrderAmount(data),
         heroImageUrl: data.heroImageUrl ?? payload.heroImageUrl ?? '',
+        lat: formatNumber(data.lat ?? payload.lat ?? null),
+        lng: formatNumber(data.lng ?? payload.lng ?? null),
+        deliveryRadiusKm: formatNumber(
+          data.deliveryRadiusKm ?? payload.deliveryRadiusKm ?? 5,
+        ),
       })
       setSuccess('Gegevens opgeslagen')
     } catch (err: any) {
@@ -228,6 +259,61 @@ export default function Settings() {
               placeholder="25.00"
             />
           </label>
+
+          <div
+            style={{
+              marginTop: 16,
+              padding: 12,
+              border: '1px solid #e2e8f0',
+              borderRadius: 10,
+              background: '#f8fafc',
+            }}
+          >
+            <h4 style={{ margin: '0 0 6px' }}>Bezorging</h4>
+            <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
+              Vul tijdelijk handmatig je locatie in. Later wordt dit automatisch
+              gegeocoded.
+            </p>
+            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+              <label style={{ fontWeight: 600, marginTop: 8 }}>
+                Latitude
+                <input
+                  style={inputStyle}
+                  value={form.lat}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, lat: e.target.value }))
+                  }
+                  placeholder="52.0907"
+                />
+              </label>
+              <label style={{ fontWeight: 600, marginTop: 8 }}>
+                Longitude
+                <input
+                  style={inputStyle}
+                  value={form.lng}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, lng: e.target.value }))
+                  }
+                  placeholder="5.1214"
+                />
+              </label>
+            </div>
+            <label style={{ display: 'block', fontWeight: 600, marginTop: 8 }}>
+              Bezorgbereik (km)
+              <input
+                style={inputStyle}
+                value={form.deliveryRadiusKm}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    deliveryRadiusKm: e.target.value,
+                  }))
+                }
+                placeholder="5"
+              />
+            </label>
+          </div>
+
           <div
             style={{
               display: 'flex',
