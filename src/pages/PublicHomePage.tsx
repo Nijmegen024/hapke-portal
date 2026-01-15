@@ -192,6 +192,7 @@ export default function PublicHomePage() {
             <div>
               <p className="ph-pill ghost">Tarieven</p>
               <h2>Start op 12%. Groei naar 3%.</h2>
+              <p className="ph-costs-note">Geldt voor de eerste 10 bedrijven.</p>
               <p className="ph-costs-sub">
                 We belonen groei. Hoe meer bestellingen via Hapke, hoe lager je commissie.
               </p>

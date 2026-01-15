@@ -703,6 +703,12 @@
   margin: 6px 0 12px;
   font-size: 32px;
 }
+.ph-costs-note {
+  margin: -6px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0f2f1;
+}
 .ph-costs-sub {
   margin: 0 0 10px;
   font-weight: 600;
