@@ -58,8 +58,8 @@ export default function PublicHomePage() {
               Speciaal voor lokale restaurants in Nijmegen (en omgeving).
             </p>
             <div className="ph-cta-row">
-              <a className="ph-btn ghost lg" href="#hapke-video">
-                Bekijk hoe Hapke werkt (30 sec)
+              <a className="ph-btn ghost lg" href="#hoe-werkt-het">
+                Bekijk hoe Hapke werkt
               </a>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function PublicHomePage() {
           </div>
         </section>
 
-        <section className="ph-steps">
+        <section className="ph-steps" id="hoe-werkt-het">
           <h2>Hoe werkt het?</h2>
           <p className="ph-steps-sub">Gemiddelde setup: 5–10 minuten.</p>
           <div className="ph-step-grid">
