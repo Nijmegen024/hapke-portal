@@ -101,20 +101,39 @@
 
 .ph-hero-copy h1 {
   font-size: clamp(28px, 5vw, 42px);
-  margin: 10px 0 14px;
-  line-height: 1.15;
+  margin: 10px 0 18px;
+  line-height: 1.2;
+  color: #0a1f2e;
 }
 .ph-hero-line {
   display: block;
 }
-.ph-hero-sub {
-  color: #475569;
-  font-size: 17px;
-  margin: 0 0 18px;
+.ph-hero-line + .ph-hero-line {
+  margin-top: 4px;
 }
-.ph-hero-sub.small {
-  font-size: 15px;
-  margin-top: -6px;
+.ph-hero-line.primary {
+  font-size: clamp(30px, 5.2vw, 46px);
+  font-weight: 700;
+}
+.ph-hero-line.secondary {
+  font-size: clamp(26px, 4.4vw, 38px);
+  font-weight: 600;
+}
+.ph-hero-line.tertiary {
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 500;
+  color: #243447;
+}
+.ph-hero-sub {
+  color: #5b6773;
+  font-size: 16px;
+  margin: 0 0 22px;
+}
+.ph-hero-region {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
 }
 .ph-pill {
   display: inline-block;
@@ -134,6 +153,28 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  margin-top: 6px;
+}
+
+.ph-hero .ph-pill {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(20, 184, 166, 0.08);
+  color: #2c7a73;
+}
+
+.ph-hero .ph-btn.ghost {
+  font-size: 15px;
+  padding: 12px 18px;
+  border-color: rgba(15, 118, 110, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+}
+.ph-hero .ph-btn.ghost:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.32);
+  box-shadow: none;
 }
 
 .ph-hero-media {

@@ -45,19 +45,17 @@ export default function PublicHomePage() {
           <div className="ph-hero-copy ph-anim">
             <p className="ph-pill">Voor restaurants</p>
             <h1>
-              <span className="ph-hero-line">Meer bestellingen.</span>
-              <span className="ph-hero-line">Lagere commissie.</span>
-              <span className="ph-hero-line">Volledige controle.</span>
+              <span className="ph-hero-line primary">Meer bestellingen.</span>
+              <span className="ph-hero-line secondary">Lagere commissie.</span>
+              <span className="ph-hero-line tertiary">Volledige controle.</span>
             </h1>
             <p className="ph-hero-sub">
-              Video + bezorgen in één platform, speciaal voor restaurants.
-            </p>
-            <p className="ph-hero-sub small">
-              Speciaal voor lokale restaurants in Nijmegen (en omgeving).
+              Video + bezorgen in een platform voor restaurants.
+              <span className="ph-hero-region">Nijmegen (en omgeving)</span>
             </p>
             <div className="ph-cta-row">
               <a className="ph-btn ghost lg" href="#hoe-werkt-het">
-                Bekijk hoe Hapke werkt
+                Zo werkt het
               </a>
             </div>
           </div>
