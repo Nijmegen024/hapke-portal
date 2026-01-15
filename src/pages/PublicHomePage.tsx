@@ -168,6 +168,11 @@ export default function PublicHomePage() {
           <section className="ph-steps" id="hoe-werkt-het">
             <h2>Hoe werkt het?</h2>
             <p className="ph-steps-sub">Binnen 5-10 minuten live.</p>
+            <div className="ph-steps-rail" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
             <div className="ph-step-grid">
               {steps.map((step, idx) => (
                 <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
