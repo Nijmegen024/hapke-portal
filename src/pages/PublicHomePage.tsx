@@ -46,7 +46,11 @@ export default function PublicHomePage() {
         <section className="ph-hero">
           <div className="ph-hero-copy ph-anim">
             <p className="ph-pill">Voor restaurants</p>
-            <h1>Meer bestellingen. Lagere commissie. Volledige controle.</h1>
+            <h1>
+              <span className="ph-hero-line">Meer bestellingen.</span>
+              <span className="ph-hero-line">Lagere commissie.</span>
+              <span className="ph-hero-line">Volledige controle.</span>
+            </h1>
             <p className="ph-hero-sub">
               Video + bezorgen in één platform, speciaal voor restaurants.
             </p>
@@ -191,6 +195,10 @@ export default function PublicHomePage() {
             <p className="ph-local-sub">
               Lokaal gestart. Gericht op groei, niet op uitknijpen. Gebouwd samen met
               Nijmeegse restaurants, niet door een anoniem platform.
+            </p>
+            <p className="ph-local-sub">
+              Heb je ideeen of aanpassingen voor de app of het dashboard om het makkelijker of
+              beter te maken? Laat het ons weten, we horen het graag en passen snel aan.
             </p>
           </div>
           <div className="ph-local-placeholder">Logo’s / quotes van lokale partners</div>

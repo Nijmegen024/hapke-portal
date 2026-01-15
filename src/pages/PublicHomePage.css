@@ -99,6 +99,9 @@
   margin: 10px 0 14px;
   line-height: 1.15;
 }
+.ph-hero-line {
+  display: block;
+}
 .ph-hero-sub {
   color: #475569;
   font-size: 17px;
