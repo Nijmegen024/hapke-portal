@@ -5,24 +5,20 @@ import logo from '../../assets/icons/hapke_logo.png'
 import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
-  { title: 'Tot 30% meer bestellingen door video', icon: 'trending_up', kpi: '30% meer' },
+  { title: 'Tot 30% meer bestellingen via video', icon: 'trending_up' },
   {
-    title: 'Eerlijke commissie die meegroeit met je succes',
-    sub: 'Start op 12%, daalt tot 3% bij volume.',
+    title: 'Commissie daalt mee',
     icon: 'payments',
-    kpi: '12% → 3%',
+    highlight: true,
+    lines: ['Start op 12%', 'Daalt automatisch naar 3% bij volume'],
   },
-  { title: 'Eigen bezorgers of Hapke-bezorging', icon: 'local_shipping', kpi: 'Keuzevrij' },
-  {
-    title: 'Bestellingen, video’s en inzichten in één dashboard',
-    icon: 'dashboard',
-    kpi: 'Alles live',
-  },
+  { title: 'Keuze: eigen bezorgers of Hapke', icon: 'local_shipping' },
+  { title: 'Alles in een dashboard', icon: 'dashboard' },
 ]
 
 const steps = [
   { title: 'Restaurant aanmelden', icon: 'person_add' },
-  { title: 'Upload menu + korte video’s (telefoon is genoeg)', icon: 'smartphone' },
+  { title: "Upload menu & korte video's (met je telefoon)", icon: 'smartphone' },
   { title: 'Bestellingen ontvangen', icon: 'receipt_long' },
 ]
 
@@ -136,40 +132,56 @@ export default function PublicHomePage() {
         </div>
       </section>
 
-        <section className="ph-proof">
-          <h2>Waarom Hapke?</h2>
-          <div className="ph-card-grid">
-            {proofCards.map((card) => (
-              <div className="ph-card" key={card.title}>
-                <div className="ph-card-icon" aria-hidden="true">
-                  <span className="material-icon">{card.icon}</span>
+        <section className="ph-story">
+          <section className="ph-proof">
+            <h2>Waarom Hapke?</h2>
+            <div className="ph-card-grid">
+              {proofCards.map((card) => (
+                <div className={`ph-card${card.highlight ? ' highlight' : ''}`} key={card.title}>
+                  <div className="ph-card-icon" aria-hidden="true">
+                    <span className="material-icon">{card.icon}</span>
+                  </div>
+                  <div className="ph-card-body">
+                    <p className="ph-card-title">{card.title}</p>
+                    {card.highlight && (
+                      <div className="ph-commission">
+                        <span>12%</span>
+                        <span className="ph-commission-line" aria-hidden="true" />
+                        <span>3%</span>
+                      </div>
+                    )}
+                    {card.lines && (
+                      <div className="ph-card-lines">
+                        {card.lines.map((line) => (
+                          <span key={line}>{line}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="ph-card-body">
-                  <p className="ph-card-title">{card.title}</p>
-                  {card.sub && <small className="ph-card-sub">{card.sub}</small>}
-                  {card.kpi && <span className="ph-card-kpi">{card.kpi}</span>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
-        <section className="ph-steps" id="hoe-werkt-het">
-          <h2>Hoe werkt het?</h2>
-          <p className="ph-steps-sub">Gemiddelde setup: 5–10 minuten.</p>
-          <div className="ph-step-grid">
-            {steps.map((step, idx) => (
-              <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
-                <div className="ph-step-icon" aria-hidden="true">
-                  <span className="material-icon">{step.icon}</span>
+          <div className="ph-story-divider" aria-hidden="true" />
+
+          <section className="ph-steps" id="hoe-werkt-het">
+            <h2>Hoe werkt het?</h2>
+            <p className="ph-steps-sub">Binnen 5-10 minuten live.</p>
+            <div className="ph-step-grid">
+              {steps.map((step, idx) => (
+                <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
+                  <div className="ph-step-icon" aria-hidden="true">
+                    <span className="material-icon">{step.icon}</span>
+                  </div>
+                  <div>
+                    <div className="ph-step-index">{idx + 1}</div>
+                    <p>{step.title}</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="ph-step-index">{idx + 1}</div>
-                  <p>{step.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
         </section>
 
         <section className="ph-costs ph-anim">
