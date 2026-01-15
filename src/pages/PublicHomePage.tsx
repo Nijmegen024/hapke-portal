@@ -5,23 +5,25 @@ import logo from '../../assets/icons/hapke_logo.png'
 import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
-  { title: 'Tot 30% meer bestellingen door video', icon: '' },
+  { title: 'Tot 30% meer bestellingen door video', icon: 'trending_up', kpi: '30% meer' },
   {
     title: 'Eerlijke commissie die meegroeit met je succes',
     sub: 'Start op 12%, daalt tot 3% bij volume.',
-    icon: '',
+    icon: 'payments',
+    kpi: '12% → 3%',
   },
-  { title: 'Eigen bezorgers of Hapke-bezorging', icon: '' },
+  { title: 'Eigen bezorgers of Hapke-bezorging', icon: 'local_shipping', kpi: 'Keuzevrij' },
   {
     title: 'Bestellingen, video’s en inzichten in één dashboard',
-    icon: '',
+    icon: 'dashboard',
+    kpi: 'Alles live',
   },
 ]
 
 const steps = [
-  { title: 'Restaurant aanmelden', icon: '' },
-  { title: 'Upload menu + korte video’s (telefoon is genoeg)', icon: '' },
-  { title: 'Bestellingen ontvangen', icon: '' },
+  { title: 'Restaurant aanmelden', icon: 'person_add' },
+  { title: 'Upload menu + korte video’s (telefoon is genoeg)', icon: 'smartphone' },
+  { title: 'Bestellingen ontvangen', icon: 'receipt_long' },
 ]
 
 export default function PublicHomePage() {
@@ -139,9 +141,14 @@ export default function PublicHomePage() {
           <div className="ph-card-grid">
             {proofCards.map((card) => (
               <div className="ph-card" key={card.title}>
-                <span className="ph-card-icon">{card.icon}</span>
-                <p>{card.title}</p>
-                {card.sub && <small className="ph-card-sub">{card.sub}</small>}
+                <div className="ph-card-icon" aria-hidden="true">
+                  <span className="material-icon">{card.icon}</span>
+                </div>
+                <div className="ph-card-body">
+                  <p className="ph-card-title">{card.title}</p>
+                  {card.sub && <small className="ph-card-sub">{card.sub}</small>}
+                  {card.kpi && <span className="ph-card-kpi">{card.kpi}</span>}
+                </div>
               </div>
             ))}
           </div>
@@ -153,7 +160,9 @@ export default function PublicHomePage() {
           <div className="ph-step-grid">
             {steps.map((step, idx) => (
               <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
-                <div className="ph-step-icon">{step.icon}</div>
+                <div className="ph-step-icon" aria-hidden="true">
+                  <span className="material-icon">{step.icon}</span>
+                </div>
                 <div>
                   <div className="ph-step-index">{idx + 1}</div>
                   <p>{step.title}</p>
