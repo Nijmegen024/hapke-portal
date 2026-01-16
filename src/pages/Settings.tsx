@@ -1,10 +1,23 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import { SupabaseImageUpload } from '../components/SupabaseImageUpload'
 
 const API_BASE = import.meta.env.VITE_API_BASE as string
 const SESSION_KEY = 'vendor_session'
 const TOKEN_KEY = 'vendor_token'
+const DEFAULT_CENTER = { lat: 51.8428, lng: 5.8547 }
+
+const markerIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  shadowSize: [41, 41],
+})
+L.Marker.prototype.options.icon = markerIcon
 
 type RestaurantResponse = {
   name?: string
@@ -41,6 +54,10 @@ const EMPTY_FORM: FormState = {
 
 export default function Settings() {
   const navigate = useNavigate()
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const mapInstance = useRef<L.Map | null>(null)
+  const markerRef = useRef<L.Marker | null>(null)
+  const circleRef = useRef<L.Circle | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -98,6 +115,88 @@ export default function Settings() {
     const timeout = window.setTimeout(() => setSuccess(null), 3000)
     return () => window.clearTimeout(timeout)
   }, [success])
+
+  const coords = useMemo(() => {
+    const lat = parseFloat(form.lat.replace(',', '.'))
+    const lng = parseFloat(form.lng.replace(',', '.'))
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+    return { lat, lng }
+  }, [form.lat, form.lng])
+
+  const radiusKm = useMemo(() => {
+    const parsed = parseFloat(form.deliveryRadiusKm.replace(',', '.'))
+    if (!Number.isFinite(parsed) || parsed <= 0) return 5
+    return parsed
+  }, [form.deliveryRadiusKm])
+
+  const setLocation = useCallback((lat: number, lng: number) => {
+    setForm((prev) => ({
+      ...prev,
+      lat: lat.toFixed(6),
+      lng: lng.toFixed(6),
+    }))
+  }, [])
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return
+
+    const map = L.map(mapRef.current, {
+      center: DEFAULT_CENTER,
+      zoom: 12,
+      zoomControl: true,
+    })
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map)
+
+    map.on('click', (event) => {
+      setLocation(event.latlng.lat, event.latlng.lng)
+    })
+
+    mapInstance.current = map
+    return () => {
+      map.remove()
+      mapInstance.current = null
+      markerRef.current = null
+      circleRef.current = null
+    }
+  }, [setLocation])
+
+  useEffect(() => {
+    const map = mapInstance.current
+    if (!map || !coords) return
+
+    if (!markerRef.current) {
+      const marker = L.marker(coords, { draggable: true }).addTo(map)
+      marker.on('dragend', () => {
+        const next = marker.getLatLng()
+        setLocation(next.lat, next.lng)
+      })
+      markerRef.current = marker
+    } else {
+      markerRef.current.setLatLng(coords)
+    }
+
+    if (!circleRef.current) {
+      circleRef.current = L.circle(coords, {
+        radius: radiusKm * 1000,
+        color: '#14B8A6',
+        weight: 2,
+        fillColor: '#14B8A6',
+        fillOpacity: 0.12,
+      }).addTo(map)
+    } else {
+      circleRef.current.setLatLng(coords)
+    }
+
+    map.setView(coords, map.getZoom(), { animate: false })
+  }, [coords, radiusKm, setLocation])
+
+  useEffect(() => {
+    if (circleRef.current) {
+      circleRef.current.setRadius(radiusKm * 1000)
+    }
+  }, [radiusKm])
 
   function resolveMinimumOrderAmount(data: RestaurantResponse) {
     const value =
@@ -271,47 +370,91 @@ export default function Settings() {
           >
             <h4 style={{ margin: '0 0 6px' }}>Bezorging</h4>
             <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
-              Vul tijdelijk handmatig je locatie in. Later wordt dit automatisch
-              gegeocoded.
+              Klik op de kaart om je locatie te zetten en stel je bezorgbereik in.
             </p>
-            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
-              <label style={{ fontWeight: 600, marginTop: 8 }}>
-                Latitude
-                <input
-                  style={inputStyle}
-                  value={form.lat}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, lat: e.target.value }))
-                  }
-                  placeholder="52.0907"
-                />
-              </label>
-              <label style={{ fontWeight: 600, marginTop: 8 }}>
-                Longitude
-                <input
-                  style={inputStyle}
-                  value={form.lng}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, lng: e.target.value }))
-                  }
-                  placeholder="5.1214"
-                />
-              </label>
+            <div
+              style={{
+                marginTop: 12,
+                borderRadius: 12,
+                overflow: 'hidden',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              <div ref={mapRef} style={{ width: '100%', height: 260 }} />
             </div>
-            <label style={{ display: 'block', fontWeight: 600, marginTop: 8 }}>
+            <p style={{ margin: '8px 0 0', color: '#475569', fontSize: 13 }}>
+              Tip: klik op de kaart of sleep de marker om te verfijnen.
+            </p>
+            <label style={{ display: 'block', fontWeight: 600, marginTop: 10 }}>
               Bezorgbereik (km)
-              <input
-                style={inputStyle}
-                value={form.deliveryRadiusKm}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    deliveryRadiusKm: e.target.value,
-                  }))
-                }
-                placeholder="5"
-              />
+              <div
+                style={{
+                  display: 'grid',
+                  gap: 10,
+                  gridTemplateColumns: '120px 1fr',
+                  alignItems: 'center',
+                  marginTop: 6,
+                }}
+              >
+                <input
+                  type="number"
+                  min="1"
+                  step="0.5"
+                  style={inputStyle}
+                  value={form.deliveryRadiusKm}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      deliveryRadiusKm: e.target.value,
+                    }))
+                  }
+                  placeholder="5"
+                />
+                <input
+                  type="range"
+                  min="1"
+                  max="25"
+                  step="0.5"
+                  value={radiusKm}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      deliveryRadiusKm: e.target.value,
+                    }))
+                  }
+                  style={{ width: '100%' }}
+                />
+              </div>
             </label>
+            <details style={{ marginTop: 10 }}>
+              <summary style={{ cursor: 'pointer', fontWeight: 600, color: '#475569' }}>
+                Geavanceerd: coordinaten
+              </summary>
+              <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+                <label style={{ fontWeight: 600, marginTop: 8 }}>
+                  Latitude
+                  <input
+                    style={inputStyle}
+                    value={form.lat}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, lat: e.target.value }))
+                    }
+                    placeholder="52.0907"
+                  />
+                </label>
+                <label style={{ fontWeight: 600, marginTop: 8 }}>
+                  Longitude
+                  <input
+                    style={inputStyle}
+                    value={form.lng}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, lng: e.target.value }))
+                    }
+                    placeholder="5.1214"
+                  />
+                </label>
+              </div>
+            </details>
           </div>
 
           <div
