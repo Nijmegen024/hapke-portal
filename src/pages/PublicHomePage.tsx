@@ -17,9 +17,11 @@ const proofCards = [
 ]
 
 const steps = [
-  { title: 'Restaurant aanmelden', icon: 'person_add' },
-  { title: "Upload menu & korte video's (met je telefoon)", icon: 'smartphone' },
-  { title: 'Bestellingen ontvangen', icon: 'receipt_long' },
+  { title: 'Gesprek inplannen', icon: 'event' },
+  { title: 'Aanmelden als partner', icon: 'groups' },
+  { title: "Video's opnemen (met onze hulp)", icon: 'videocam' },
+  { title: "Menu & video's uploaden", icon: 'cloud_upload' },
+  { title: 'Live gaan & eerste bestellingen', icon: 'rocket_launch' },
 ]
 
 export default function PublicHomePage() {
@@ -169,11 +171,11 @@ export default function PublicHomePage() {
             <div className="ph-roadmap" role="list">
               <svg
                 className="ph-roadmap-path"
-                viewBox="0 0 1000 260"
+                viewBox="0 0 1000 280"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <path d="M 70 90 C 220 0, 340 0, 500 110 S 770 220, 930 110" />
+                <path d="M 60 90 C 200 0, 320 0, 460 120 S 700 240, 840 120 S 980 0, 980 90" />
               </svg>
               {steps.map((step, idx) => (
                 <div

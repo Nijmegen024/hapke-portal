@@ -609,7 +609,7 @@
 
 .ph-roadmap {
   position: relative;
-  min-height: 270px;
+  min-height: 300px;
   padding: 22px 16px;
   border-radius: 16px;
   border: 1px solid rgba(20, 184, 166, 0.18);
@@ -650,17 +650,26 @@
   transition: transform 200ms ease;
 }
 .ph-roadmap-node[data-step='1'] {
-  --node-x: 16%;
-  --node-y: 28%;
+  --node-x: 12%;
+  --node-y: 30%;
 }
 .ph-roadmap-node[data-step='2'] {
-  --node-x: 50%;
-  --node-y: 76%;
+  --node-x: 30%;
+  --node-y: 78%;
   flex-direction: column-reverse;
 }
 .ph-roadmap-node[data-step='3'] {
-  --node-x: 84%;
-  --node-y: 30%;
+  --node-x: 50%;
+  --node-y: 24%;
+}
+.ph-roadmap-node[data-step='4'] {
+  --node-x: 70%;
+  --node-y: 80%;
+  flex-direction: column-reverse;
+}
+.ph-roadmap-node[data-step='5'] {
+  --node-x: 88%;
+  --node-y: 32%;
 }
 .ph-roadmap-dot {
   width: 12px;
@@ -756,7 +765,8 @@
   .ph-roadmap-node + .ph-roadmap-node {
     margin-top: 12px;
   }
-  .ph-roadmap-node[data-step='2'] {
+  .ph-roadmap-node[data-step='2'],
+  .ph-roadmap-node[data-step='4'] {
     flex-direction: row;
   }
   .ph-roadmap-card {
