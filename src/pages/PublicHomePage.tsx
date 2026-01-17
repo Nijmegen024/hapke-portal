@@ -1,19 +1,31 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './PublicHomePage.css'
 import logo from '../../assets/icons/hapke_logo.png'
 import iphoneFrame from '../assets/iphone-frame.png'
 
 const proofCards = [
-  { title: 'Tot 30% meer bestellingen via video', icon: 'trending_up' },
+  {
+    title: 'Tot 30% meer bestellingen via video',
+    icon: 'trending_up',
+    lines: ['Korte video’s trekken nieuwe klanten.', 'Meer zichtbaarheid in de Hapke-feed.'],
+  },
   {
     title: 'Commissie daalt mee',
     icon: 'payments',
     highlight: true,
     lines: ['Start op 12%', 'Daalt automatisch naar 3% bij volume'],
   },
-  { title: 'Keuze: eigen bezorgers of Hapke', icon: 'local_shipping' },
-  { title: 'Alles in een dashboard', icon: 'dashboard' },
+  {
+    title: 'Keuze: eigen bezorgers of Hapke',
+    icon: 'local_shipping',
+    lines: ['Eigen bezorgers of Hapke-bezorging.', 'Flexibel per dag of periode.'],
+  },
+  {
+    title: 'Alles in een dashboard',
+    icon: 'dashboard',
+    lines: ['Bestellingen, video’s en inzichten samen.', 'Realtime overzicht van prestaties.'],
+  },
 ]
 
 const steps = [
@@ -25,6 +37,10 @@ const steps = [
 ]
 
 export default function PublicHomePage() {
+  const [openCard, setOpenCard] = useState<number | null>(() => {
+    const idx = proofCards.findIndex((card) => card.highlight)
+    return idx >= 0 ? idx : null
+  })
   return (
     <div className="ph-page" id="top">
       <header className="ph-header">
@@ -136,8 +152,16 @@ export default function PublicHomePage() {
           <section className="ph-proof">
             <h2>Waarom Hapke?</h2>
             <div className="ph-card-grid">
-              {proofCards.map((card) => (
-                <div className={`ph-card${card.highlight ? ' highlight' : ''}`} key={card.title}>
+              {proofCards.map((card, idx) => {
+                const isOpen = openCard === idx
+                return (
+                  <button
+                    type="button"
+                    className={`ph-card${card.highlight ? ' highlight' : ''}${isOpen ? ' open' : ''}`}
+                    key={card.title}
+                    onClick={() => setOpenCard((prev) => (prev === idx ? null : idx))}
+                    aria-expanded={isOpen}
+                  >
                   <div className="ph-card-icon" aria-hidden="true">
                     <span className="material-icon">{card.icon}</span>
                   </div>
@@ -150,7 +174,7 @@ export default function PublicHomePage() {
                         <span>3%</span>
                       </div>
                     )}
-                    {card.lines && (
+                    {card.lines && isOpen && (
                       <div className="ph-card-lines">
                         {card.lines.map((line) => (
                           <span key={line}>{line}</span>
@@ -158,8 +182,9 @@ export default function PublicHomePage() {
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
+                  </button>
+                )
+              })}
             </div>
           </section>
 
