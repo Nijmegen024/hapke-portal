@@ -14,6 +14,9 @@ type RestaurantResponse = {
   minOrderValue?: number | null
   heroImageUrl?: string | null
   deliveryRadiusKm?: number | null
+  street?: string | null
+  postalCode?: string | null
+  city?: string | null
 }
 
 type FormState = {
@@ -22,6 +25,9 @@ type FormState = {
   minOrderAmount: string
   heroImageUrl: string
   deliveryRadiusKm: string
+  street: string
+  postalCode: string
+  city: string
 }
 
 const EMPTY_FORM: FormState = {
@@ -30,6 +36,9 @@ const EMPTY_FORM: FormState = {
   minOrderAmount: '',
   heroImageUrl: '',
   deliveryRadiusKm: '5',
+  street: '',
+  postalCode: '',
+  city: '',
 }
 
 export default function Settings() {
@@ -72,6 +81,9 @@ export default function Settings() {
         minOrderAmount: resolveMinimumOrderAmount(data),
         heroImageUrl: data.heroImageUrl ?? '',
         deliveryRadiusKm: formatNumber(data.deliveryRadiusKm, '5'),
+        street: formatText(data.street),
+        postalCode: formatText(data.postalCode),
+        city: formatText(data.city),
       })
     } catch (err: any) {
       setError(err?.message || 'Kon restaurantgegevens niet laden')
@@ -108,6 +120,10 @@ export default function Settings() {
   function formatNumber(value: number | null | undefined, fallback = '') {
     if (value === null || value === undefined) return fallback
     return String(value)
+  }
+
+  function formatText(value: string | null | undefined) {
+    return value ?? ''
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -147,6 +163,9 @@ export default function Settings() {
         minimumOrderAmount: Number(parsedValue.toFixed(2)),
         heroImageUrl: form.heroImageUrl.trim() || null,
         deliveryRadiusKm: parsedRadius ?? 5,
+        street: form.street.trim() || null,
+        postalCode: form.postalCode.trim() || null,
+        city: form.city.trim() || null,
       }
       const res = await fetch(`${API_BASE}/vendor/restaurant`, {
         method: 'PUT',
@@ -170,6 +189,9 @@ export default function Settings() {
         deliveryRadiusKm: formatNumber(
           data.deliveryRadiusKm ?? payload.deliveryRadiusKm ?? 5,
         ),
+        street: formatText(data.street ?? payload.street),
+        postalCode: formatText(data.postalCode ?? payload.postalCode),
+        city: formatText(data.city ?? payload.city),
       })
       setSuccess('Gegevens opgeslagen')
     } catch (err: any) {
@@ -256,9 +278,66 @@ export default function Settings() {
               background: '#f8fafc',
             }}
           >
+            <h4 style={{ margin: '0 0 6px' }}>Adres</h4>
+            <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
+              Dit adres gebruiken we om je restaurant in de app te tonen.
+            </p>
+            <label style={{ display: 'block', fontWeight: 600, marginTop: 12 }}>
+              Straat + huisnummer
+              <input
+                style={inputStyle}
+                value={form.street}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, street: e.target.value }))
+                }
+                placeholder="Straatnaam 12"
+              />
+            </label>
+            <div
+              style={{
+                display: 'grid',
+                gap: 12,
+                gridTemplateColumns: '140px 1fr',
+                marginTop: 12,
+              }}
+            >
+              <label style={{ display: 'block', fontWeight: 600 }}>
+                Postcode
+                <input
+                  style={inputStyle}
+                  value={form.postalCode}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, postalCode: e.target.value }))
+                  }
+                  placeholder="1234 AB"
+                />
+              </label>
+              <label style={{ display: 'block', fontWeight: 600 }}>
+                Stad
+                <input
+                  style={inputStyle}
+                  value={form.city}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, city: e.target.value }))
+                  }
+                  placeholder="Nijmegen"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              padding: 12,
+              border: '1px solid #e2e8f0',
+              borderRadius: 10,
+              background: '#f8fafc',
+            }}
+          >
             <h4 style={{ margin: '0 0 6px' }}>Bezorging</h4>
             <p style={{ margin: 0, color: '#475569', fontSize: 14 }}>
-              We gebruiken het adres uit je aanmelding om je bezorggebied te bepalen.
+              We gebruiken het adres hierboven om je bezorggebied te bepalen.
             </p>
             <label style={{ display: 'block', fontWeight: 600, marginTop: 12 }}>
               Bezorgbereik (km)
