@@ -26,7 +26,7 @@ const steps = [
 
 export default function PublicHomePage() {
   return (
-    <div className="ph-page">
+    <div className="ph-page" id="top">
       <header className="ph-header">
         <div className="ph-brand">
           <img src={logo} alt="Hapke" />
@@ -270,7 +270,76 @@ export default function PublicHomePage() {
             </Link>
           </div>
         </section>
+
+        <footer className="ph-footer">
+          <div className="ph-footer-inner">
+            <div className="ph-footer-top">
+              <div className="ph-footer-brand">
+                <img src={logo} alt="Hapke" />
+                <div>
+                  <strong>Hapke</strong>
+                  <p>Video + bezorgen in één platform voor restaurants.</p>
+                </div>
+              </div>
+              <div className="ph-footer-social">
+                <span>Volg ons</span>
+                <div className="ph-footer-social-links">
+                  <a href="https://www.instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+                    <span className="material-icon">photo_camera</span>
+                  </a>
+                  <a href="https://www.tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                    <span className="material-icon">play_circle</span>
+                  </a>
+                  <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                    <span className="material-icon">work</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="ph-footer-grid">
+              <div className="ph-footer-col">
+                <h4>Voor restaurants</h4>
+                <a href="#hoe-werkt-het">Hoe werkt het</a>
+                <Link to="/register">Restaurant aanmelden</Link>
+                <Link to="/login">Inloggen</Link>
+                <a href="mailto:partners@hapke.nl">Gesprek inplannen</a>
+              </div>
+              <div className="ph-footer-col">
+                <h4>Bedrijf</h4>
+                <a href="mailto:info@hapke.nl">Contact</a>
+                <a href="mailto:info@hapke.nl?subject=Partner%20worden">Partner worden</a>
+                <a href="mailto:info@hapke.nl?subject=Vacature">Vacatures</a>
+              </div>
+              <div className="ph-footer-col">
+                <h4>Support</h4>
+                <a href="mailto:support@hapke.nl">Hulp nodig?</a>
+                <a href="mailto:feedback@hapke.nl">Feedback & ideeën</a>
+                <a href="mailto:privacy@hapke.nl">Privacyvragen</a>
+              </div>
+              <div className="ph-footer-col">
+                <h4>Juridisch</h4>
+                <a href="/voorwaarden">Algemene voorwaarden</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/cookies">Cookieverklaring</a>
+              </div>
+            </div>
+
+            <div className="ph-footer-bottom">
+              <span>© 2026 Hapke. Alle rechten voorbehouden.</span>
+              <div className="ph-footer-legal">
+                <a href="/voorwaarden">Voorwaarden</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/cookies">Cookies</a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </main>
+
+      <a className="ph-back-to-top" href="#top" aria-label="Terug naar boven">
+        <span className="material-icon">north</span>
+      </a>
     </div>
   )
 }
