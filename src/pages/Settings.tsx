@@ -178,7 +178,20 @@ export default function Settings() {
       }
       if (!res.ok) {
         const text = await res.text()
-        throw new Error(text || 'Opslaan mislukt')
+        let message = text
+        if (text) {
+          try {
+            const parsed = JSON.parse(text) as { message?: string | string[] }
+            if (Array.isArray(parsed?.message)) {
+              message = parsed.message.join(' ')
+            } else if (typeof parsed?.message === 'string') {
+              message = parsed.message
+            }
+          } catch {
+            // keep raw text
+          }
+        }
+        throw new Error(message || 'Opslaan mislukt')
       }
       const data: RestaurantResponse = await res.json()
       setForm({
