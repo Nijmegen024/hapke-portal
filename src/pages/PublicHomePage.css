@@ -515,7 +515,7 @@
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  box-shadow: none;
+  box-shadow: 0 12px 26px rgba(15, 118, 110, 0.12);
   transition: border-color 160ms ease, transform 160ms ease;
   border-top: 2px solid rgba(20, 184, 166, 0.28);
 }
@@ -627,16 +627,6 @@
   border: 1px dashed rgba(20, 184, 166, 0.12);
   pointer-events: none;
 }
-.ph-roadmap::after {
-  content: '';
-  position: absolute;
-  right: -60px;
-  bottom: -80px;
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(circle, rgba(255, 200, 87, 0.24), rgba(255, 200, 87, 0));
-  pointer-events: none;
-}
 .ph-roadmap-path {
   position: absolute;
   inset: 0;
@@ -664,13 +654,13 @@
 .ph-roadmap-node[data-step='1'] {
   --node-x: 12%;
   --node-y: 32%;
-  --card-offset: 40px;
+  --card-offset: 56px;
   --card-shift: 0px;
 }
 .ph-roadmap-node[data-step='2'] {
   --node-x: 30%;
   --node-y: 78%;
-  --card-offset: -40px;
+  --card-offset: -56px;
   --card-shift: 48px;
   --node-accent: var(--ph-accent);
   --node-accent-soft: rgba(255, 200, 87, 0.22);
@@ -680,13 +670,13 @@
 .ph-roadmap-node[data-step='3'] {
   --node-x: 50%;
   --node-y: 25%;
-  --card-offset: 40px;
+  --card-offset: 56px;
   --card-shift: 0px;
 }
 .ph-roadmap-node[data-step='4'] {
   --node-x: 70%;
   --node-y: 80%;
-  --card-offset: -40px;
+  --card-offset: -56px;
   --card-shift: -48px;
   --node-accent: var(--ph-accent);
   --node-accent-soft: rgba(255, 200, 87, 0.22);
@@ -696,7 +686,7 @@
 .ph-roadmap-node[data-step='5'] {
   --node-x: 88%;
   --node-y: 32%;
-  --card-offset: 40px;
+  --card-offset: 56px;
   --card-shift: -6px;
 }
 .ph-roadmap-dot {
@@ -710,6 +700,7 @@
   box-shadow: 0 0 0 5px var(--node-accent-soft);
   transform: translate(-50%, -50%);
   transition: transform 200ms ease, box-shadow 200ms ease;
+  z-index: 2;
 }
 .ph-roadmap-card {
   position: absolute;
@@ -730,6 +721,7 @@
     calc(-50% + var(--card-offset, 56px))
   );
   transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  z-index: 1;
 }
 .ph-roadmap-icon {
   width: 34px;
