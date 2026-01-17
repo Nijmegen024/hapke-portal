@@ -171,11 +171,11 @@ export default function PublicHomePage() {
             <div className="ph-roadmap" role="list">
               <svg
                 className="ph-roadmap-path"
-                viewBox="0 0 1000 280"
+                viewBox="0 0 1000 300"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <path d="M 60 90 C 200 0, 320 0, 460 120 S 700 240, 840 120 S 980 0, 980 90" />
+                <path d="M 120 96 C 200 10, 250 280, 300 234 C 360 200, 420 20, 500 75 C 580 130, 630 300, 700 240 C 760 200, 820 20, 880 96" />
               </svg>
               {steps.map((step, idx) => (
                 <div
