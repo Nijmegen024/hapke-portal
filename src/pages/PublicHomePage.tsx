@@ -166,20 +166,31 @@ export default function PublicHomePage() {
           <section className="ph-steps" id="hoe-werkt-het">
             <h2>Hoe werkt het?</h2>
             <p className="ph-steps-sub">Binnen 5-10 minuten live.</p>
-            <div className="ph-steps-rail" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="ph-step-grid">
+            <div className="ph-roadmap" role="list">
+              <svg
+                className="ph-roadmap-path"
+                viewBox="0 0 1000 260"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path d="M 70 90 C 220 0, 340 0, 500 110 S 770 220, 930 110" />
+              </svg>
               {steps.map((step, idx) => (
-                <div className="ph-step" key={step.title} style={{ animationDelay: `${idx * 80}ms` }}>
-                  <div className="ph-step-icon" aria-hidden="true">
-                    <span className="material-icon">{step.icon}</span>
-                  </div>
-                  <div>
-                    <div className="ph-step-index">{idx + 1}</div>
-                    <p>{step.title}</p>
+                <div
+                  className="ph-roadmap-node"
+                  data-step={idx + 1}
+                  key={step.title}
+                  role="listitem"
+                >
+                  <span className="ph-roadmap-dot" aria-hidden="true" />
+                  <div className="ph-roadmap-card">
+                    <div className="ph-roadmap-icon" aria-hidden="true">
+                      <span className="material-icon">{step.icon}</span>
+                    </div>
+                    <div className="ph-roadmap-text">
+                      <span className="ph-roadmap-index">Stap {idx + 1}</span>
+                      <p className="ph-roadmap-title">{step.title}</p>
+                    </div>
                   </div>
                 </div>
               ))}
