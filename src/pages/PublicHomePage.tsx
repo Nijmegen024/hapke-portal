@@ -175,7 +175,24 @@ export default function PublicHomePage() {
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <path d="M 120 96 C 200 10, 250 280, 300 234 C 360 200, 420 20, 500 75 C 580 130, 630 300, 700 240 C 760 200, 820 20, 880 96" />
+                <defs>
+                  <linearGradient
+                    id="ph-roadmap-gradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
+                    <stop offset="0%" stopColor="#14b8a6" />
+                    <stop offset="55%" stopColor="#14b8a6" />
+                    <stop offset="70%" stopColor="#ffc857" />
+                    <stop offset="100%" stopColor="#14b8a6" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M 120 96 C 200 10, 250 280, 300 234 C 360 200, 420 20, 500 75 C 580 130, 630 300, 700 240 C 760 200, 820 20, 880 96"
+                  stroke="url(#ph-roadmap-gradient)"
+                />
               </svg>
               {steps.map((step, idx) => (
                 <div
