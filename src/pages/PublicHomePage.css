@@ -190,14 +190,41 @@
   margin-left: auto;
   filter: none;
   transform: none;
-  border-radius: 52px;
+  border-radius: 56px;
   overflow: hidden;
-  background: #0d1c2f;
+  background: linear-gradient(160deg, #1b2028 0%, #0a0f16 100%);
+  padding: 10px;
+  box-shadow:
+    0 34px 90px rgba(7, 11, 18, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.phoneWrap::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50px;
+  background: #0a0f16;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 10px 40px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+.phoneWrap::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 10px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  opacity: 0.6;
+  pointer-events: none;
 }
 .screen {
   position: absolute;
-  inset: 3.6% 4.4%;
-  border-radius: 46px;
+  inset: 16px;
+  border-radius: 42px;
   overflow: hidden;
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
@@ -210,17 +237,55 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 46px;
+  border-radius: 42px;
+}
+.ph-iphone-notch {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 44%;
+  max-width: 180px;
+  height: 26px;
+  border-radius: 16px;
+  background: #0b0c0f;
+  transform: translateX(-50%);
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+  z-index: 3;
+}
+.ph-iphone-notch::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 26px;
+  height: 4px;
+  border-radius: 999px;
+  background: #14181d;
+  transform: translateY(-50%);
+}
+.ph-iphone-notch::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #14181d;
+  transform: translateY(-50%);
 }
 .ph-media-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 46px;
+  border-radius: 42px;
   overflow: hidden;
   pointer-events: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding-top: 12px;
 }
 .frameOverlay {
   display: none;
@@ -242,15 +307,15 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  top: 18px;
   display: flex;
   align-items: center;
   gap: 10px;
   justify-content: space-between;
   padding: 10px 12px;
   background: #14b8a6;
-  border-top-left-radius: 46px;
-  border-top-right-radius: 46px;
+  border-top-left-radius: 42px;
+  border-top-right-radius: 42px;
 }
 .ph-top-icon {
   pointer-events: auto;
@@ -1138,6 +1203,7 @@
   }
   .ph-app-topbar {
     padding: 8px 10px;
+    top: 12px;
   }
   .ph-top-icon {
     padding: 6px 8px;

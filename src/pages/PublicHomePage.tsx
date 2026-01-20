@@ -89,6 +89,7 @@ export default function PublicHomePage() {
                 loop
                 autoPlay
               />
+              <div className="ph-iphone-notch" aria-hidden="true" />
               <div className="ph-media-overlay">
                 <div className="ph-app-topbar">
                   <button className="ph-top-icon">←</button>
