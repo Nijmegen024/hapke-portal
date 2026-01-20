@@ -252,9 +252,9 @@ export default function PublicHomePage() {
                 We belonen groei. Hoe meer bestellingen via Hapke, hoe lager je commissie.
               </p>
               <ul className="ph-costs-tiers">
-                <li>1.000 orders → 10%</li>
-                <li>2.500 orders → 8%</li>
-                <li>5.000 orders → 3%</li>
+                <li>600 orders → 10%</li>
+                <li>1.400 orders → 8%</li>
+                <li>2.800 orders → 3%</li>
               </ul>
               <p className="ph-costs-footnote">
                 Staffels gelden op basis van totaal aantal bestellingen.
