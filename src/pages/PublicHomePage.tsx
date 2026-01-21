@@ -287,12 +287,12 @@ export default function PublicHomePage() {
 
         <section className="ph-cta-final">
           <div>
-            <h3>Start gratis – binnen 5 minuten live</h3>
+            <h3>Word partner – binnen 5 minuten live</h3>
             <p>Geen contract. Binnen 5 minuten live.</p>
           </div>
           <div className="ph-cta-final-actions">
             <Link to="/register" className="ph-btn primary lg">
-              Start gratis
+              Word partner
             </Link>
           </div>
         </section>
