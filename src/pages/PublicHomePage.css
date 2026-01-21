@@ -190,10 +190,15 @@
   margin-left: auto;
   filter: none;
   transform: none;
-  border-radius: 56px;
+  --phone-radius: 56px;
+  --bezel-inset: 8px;
+  --screen-inset: 14px;
+  --bezel-radius: calc(var(--phone-radius) - var(--bezel-inset));
+  --screen-radius: calc(var(--phone-radius) - var(--screen-inset));
+  border-radius: var(--phone-radius);
   overflow: hidden;
   background: linear-gradient(160deg, #1b2028 0%, #0a0f16 100%);
-  padding: 10px;
+  padding: 0;
   box-shadow:
     0 34px 90px rgba(7, 11, 18, 0.45),
     inset 0 0 0 1px rgba(255, 255, 255, 0.06);
@@ -201,8 +206,8 @@
 .phoneWrap::before {
   content: '';
   position: absolute;
-  inset: 8px;
-  border-radius: 50px;
+  inset: var(--bezel-inset);
+  border-radius: var(--bezel-radius);
   background: #0a0f16;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
@@ -212,9 +217,9 @@
 .phoneWrap::after {
   content: '';
   position: absolute;
-  left: 18px;
-  right: 18px;
-  top: 10px;
+  left: calc(var(--screen-inset) + 6px);
+  right: calc(var(--screen-inset) + 6px);
+  top: 12px;
   height: 8px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
@@ -223,8 +228,8 @@
 }
 .screen {
   position: absolute;
-  inset: 16px;
-  border-radius: 42px;
+  inset: var(--screen-inset);
+  border-radius: var(--screen-radius);
   overflow: hidden;
   background: #000;
   font-family: 'DM Sans', 'Poppins', sans-serif;
@@ -237,7 +242,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 42px;
+  border-radius: var(--screen-radius);
 }
 .ph-iphone-notch {
   position: absolute;
@@ -279,7 +284,7 @@
 .ph-media-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 42px;
+  border-radius: var(--screen-radius);
   overflow: hidden;
   pointer-events: none;
   display: flex;
@@ -314,8 +319,8 @@
   justify-content: space-between;
   padding: 10px 12px;
   background: #14b8a6;
-  border-top-left-radius: 42px;
-  border-top-right-radius: 42px;
+  border-top-left-radius: var(--screen-radius);
+  border-top-right-radius: var(--screen-radius);
 }
 .ph-top-icon {
   pointer-events: auto;
