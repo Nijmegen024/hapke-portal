@@ -99,6 +99,41 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 30px;
   align-items: center;
+  position: relative;
+  border-radius: 32px;
+  background:
+    radial-gradient(520px 420px at 8% 8%, rgba(20, 184, 166, 0.18), transparent 65%),
+    radial-gradient(420px 360px at 92% 12%, rgba(255, 200, 87, 0.18), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 252, 250, 0.85));
+  border: 1px solid rgba(20, 184, 166, 0.12);
+  box-shadow: 0 30px 70px rgba(13, 66, 62, 0.08);
+  overflow: hidden;
+}
+.ph-hero::before {
+  content: '';
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  left: -220px;
+  bottom: -220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.2), transparent 62%);
+  pointer-events: none;
+}
+.ph-hero::after {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  right: -180px;
+  top: -200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 118, 110, 0.12), transparent 65%);
+  pointer-events: none;
+}
+.ph-hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .ph-hero-copy h1 {
